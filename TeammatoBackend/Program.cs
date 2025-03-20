@@ -15,10 +15,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();
-builder.Services.AddDbContext<ApplicationDBContext>(optionsAction: options=>
-{
-    options.UseNpgsql("Host=localhost;Username=teammato;Password=12345;Database=teammato;");
-});
+builder.Services.AddDbContext<ApplicationDBContext>();
 builder.Services.AddAuthorization();
 builder.Services.AddAuthentication("access-jwt-token").AddJwtBearer("refresh-jwt-token", (options)=>
 {

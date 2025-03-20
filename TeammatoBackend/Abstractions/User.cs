@@ -6,22 +6,22 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace TeammatoBackend.Abstractions
 {
-    [Table("users")]
+   
     public class User
     {
-        [Column("name")]
-        public string ?Name{get;set;}
-        [Column("email")]
+        
+        public string Name{get;set;}
+        
 
         public string Email{get;set;}
-        [Column("password")]
+        
 
         public string Password{get;set;}
-        [Column("image")]
+       
 
         public string Image{get;set;}
         [Key]
-        [Column("id")]
+       
 
         public string ?Id{get;set;}
     }
