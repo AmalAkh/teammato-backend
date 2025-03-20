@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace TeammatoBackend.Abstractions
 {
@@ -10,9 +11,9 @@ namespace TeammatoBackend.Abstractions
     public class User
     {
         
-        public string Name{get;set;}
+        public string NickName{get;set;}
         
-
+        
         public string Email{get;set;}
         
 

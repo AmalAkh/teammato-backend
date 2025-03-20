@@ -1,5 +1,6 @@
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using TeammatoBackend.Abstractions;
 namespace TeammatoBackend.Database 
 {
@@ -18,8 +19,11 @@ namespace TeammatoBackend.Database
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<User>().HasKey(u=>u.Id);
-            modelBuilder.Entity<User>().Property(u=>u.Name).IsRequired();
-            modelBuilder.Entity<User>().Property(u=>u.Email).IsRequired();
+            modelBuilder.Entity<User>().Property(u=>u.NickName).IsRequired().HasMaxLength(32);
+            modelBuilder.Entity<User>().HasIndex(u=>u.NickName).IsUnique();
+            
+            modelBuilder.Entity<User>().HasIndex(u=>u.Email).IsUnique();
+            
             modelBuilder.Entity<User>().Property(u=>u.Image).IsRequired();
             modelBuilder.Entity<User>().Property(u=>u.Password).IsRequired();
 
