@@ -9,9 +9,14 @@ using Npgsql.EntityFrameworkCore;
 using System.Diagnostics;
 using Microsoft.AspNetCore.Authorization;
 using System.IdentityModel.Tokens.Jwt;
+using TeammatoBackend.Utils;
+using Microsoft.IdentityModel.Tokens;
+using System.Linq;
+using System.Security.Claims;
 namespace TeammatoBackend.Controllers
 {
     [Route("api/users")]
+    
     [ApiController]
     public class UserController : Controller
     {
@@ -30,13 +35,49 @@ namespace TeammatoBackend.Controllers
             
             _applicationDBContext.SaveChanges();
             var jwtToken = new JwtSecurityToken(
-                issuer:"teammato-backend", 
-                audience:"teammato-user"+user.Id, 
-                expires:DateTime.UtcNow.Add(TimeSpan.FromDays(365))
-                
+                issuer:JwtAuthOptions.Issuer, 
+                audience:JwtAuthOptions.Audience, 
+                claims:new List<Claim>(){new Claim("UserId", user.Id)},
+                expires:DateTime.UtcNow.Add(TimeSpan.FromDays(365)),
+                signingCredentials: new SigningCredentials(
+                    JwtAuthOptions.GetAccessTokenSymmetricSecurityKey(), 
+                    SecurityAlgorithms.HmacSha256
+                )
+                            
             );
-            jwtToken.Payload.Add("UserId", user.Id);
+            
             return Ok(new JwtSecurityTokenHandler().WriteToken(jwtToken));
+        }
+        [HttpGet("access_token")]
+        public async Task<IActionResult> AccessToken()
+        {
+
+            var jwtToken = new JwtSecurityToken(
+                issuer:JwtAuthOptions.Issuer, 
+                audience:JwtAuthOptions.Audience, 
+                claims:new List<Claim>(){new Claim("UserId", HttpContext.User.FindFirst("UserId")?.Value)},
+                expires:DateTime.UtcNow.Add(TimeSpan.FromMinutes(1)),
+                signingCredentials: new SigningCredentials(
+                    JwtAuthOptions.GetAccessTokenSymmetricSecurityKey(), 
+                    SecurityAlgorithms.HmacSha256
+                )
+                            
+            );
+            return Ok(jwtToken);
+        }
+        [HttpGet("test")]
+        [Authorize(AuthenticationSchemes = "refresh-jwt-token")]
+        public async Task<IActionResult> Test()
+        {
+            
+            return Ok(HttpContext.User.FindFirst("UserId")?.Value);
+        }
+        [HttpGet("test2")]
+        [Authorize(AuthenticationSchemes = "access-jwt-token")]
+        public async Task<IActionResult> Test2()
+        {
+            
+            return Ok(HttpContext.User.FindFirst("UserId")?.Value);
         }
     
         
