@@ -57,6 +57,28 @@ namespace TeammatoBackend.Controllers
 
             return Ok(_applicationDBContext.Languages.Where((lang)=>lang.UserId == HttpContext.User.FindFirstValue("UserId")));
         }
+
+        [HttpDelete("{langCode}")]
+        [Authorize(AuthenticationSchemes = "access-jwt-token")]
+        public async Task<IActionResult> DeleteLanguage(string langCode)
+        {
+            var language = _applicationDBContext.Languages
+            .FirstOrDefault(lang => lang.UserId == HttpContext.User.FindFirstValue("UserId") && lang.ISOName == langCode);
+
+            if (language == null)
+            {
+                return NotFound();
+            }
+            _applicationDBContext.Languages.Remove(language);
+            int changes = await _applicationDBContext.SaveChangesAsync();
+
+            if (changes > 0)
+            {
+                return Ok(new { message = "Language deleted successfully" });
+            }
+            return StatusCode(500);
+
+        }
         [HttpGet("test")]
         //[Authorize(AuthenticationSchemes = "access-jwt-token")]
         public async Task<IActionResult> Test()
