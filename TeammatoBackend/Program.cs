@@ -7,6 +7,10 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
+using System.Net.WebSockets;
+using System.Text;
+using TeammatoBackend.Abstractions;
+using TeammatoBackend.WebSockets;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -70,10 +74,19 @@ var app = builder.Build();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.UseWebSockets(new WebSocketOptions(){KeepAliveTimeout=TimeSpan.FromSeconds(4)});
+
+
+
 
 
 app.MapControllers();
-// Configure the HTTP request pipeline.
+
+var websocketHandler = new WebSocketHandler();
+app.Map("/ws", async (context)=>
+{
+    await websocketHandler.HandleConnection(context);
+});
 
 
 app.Run();
