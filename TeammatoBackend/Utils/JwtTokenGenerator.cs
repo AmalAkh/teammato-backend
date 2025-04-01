@@ -28,7 +28,7 @@ public class JwtTokenGenerator
                 issuer:JwtAuthOptions.Issuer, 
                 audience:JwtAuthOptions.Audience, 
                 claims:claims,
-                expires:DateTime.UtcNow.Add(TimeSpan.FromMinutes(1)),
+                expires:DateTime.UtcNow.Add(TimeSpan.FromMinutes(30)),
                 signingCredentials: new SigningCredentials(
                     JwtAuthOptions.GetRefreshTokenSymmetricSecurityKey(), 
                     SecurityAlgorithms.HmacSha256

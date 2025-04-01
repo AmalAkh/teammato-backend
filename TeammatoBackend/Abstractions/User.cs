@@ -25,5 +25,7 @@ namespace TeammatoBackend.Abstractions
        
 
         public string ?Id{get;set;}
+        
+        public ICollection<Language> ?Languages {get;set;}
     }
 }

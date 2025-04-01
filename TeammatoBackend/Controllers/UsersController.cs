@@ -62,22 +62,14 @@ namespace TeammatoBackend.Controllers
             }
             return Unauthorized();
         }
-        [HttpGet("access_token")]
+        [HttpGet("access-token")]
+        [Authorize(AuthenticationSchemes = "refresh-jwt-token")]
+
         public async Task<IActionResult> AccessToken()
         {
-
-            var jwtToken = new JwtSecurityToken(
-                issuer:JwtAuthOptions.Issuer, 
-                audience:JwtAuthOptions.Audience, 
-                claims:new List<Claim>(){new Claim("UserId", HttpContext.User.FindFirst("UserId")?.Value)},
-                expires:DateTime.UtcNow.Add(TimeSpan.FromMinutes(1)),
-                signingCredentials: new SigningCredentials(
-                    JwtAuthOptions.GetAccessTokenSymmetricSecurityKey(), 
-                    SecurityAlgorithms.HmacSha256
-                )
-                            
-            );
-            return Ok(jwtToken);
+            var userId = HttpContext.User.FindFirst("UserId")?.Value;
+            string token = new JwtSecurityTokenHandler().WriteToken(JwtTokenGenerator.GenerateAccessToken(new List<Claim>(){ new Claim("UserId", HttpContext.User.FindFirstValue("UserId")) }));
+            return Ok(token);
         }
         [HttpGet("test")]
         [Authorize(AuthenticationSchemes = "refresh-jwt-token")]
@@ -93,7 +85,9 @@ namespace TeammatoBackend.Controllers
             
             return Ok(HttpContext.User.FindFirst("UserId")?.Value);
         }
-    
+
+
+       
         
 
     }
