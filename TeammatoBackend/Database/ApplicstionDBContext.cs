@@ -36,6 +36,9 @@ namespace TeammatoBackend.Database
             modelBuilder.Entity<Language>().HasOne(lang=>lang.User).WithMany(usr=>usr.Languages)
             .HasForeignKey(lang=>lang.UserId).OnDelete(DeleteBehavior.Cascade);
             modelBuilder.Entity<Language>().HasKey((lang)=>new {lang.ISOName, lang.UserId});
+
+            modelBuilder.Entity<Chat>().HasMany(chat=>chat.Participants).WithMany(usr=>usr.Chats);
+            modelBuilder.Entity<Chat>().HasKey(chat=>chat.Id);
             
         }
 

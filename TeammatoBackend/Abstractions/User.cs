@@ -27,5 +27,7 @@ namespace TeammatoBackend.Abstractions
         public string ?Id{get;set;}
         
         public ICollection<Language> ?Languages {get;set;}
+        [JsonIgnore]
+        public ICollection<Chat> ?Chats {get;set;}
     }
 }
