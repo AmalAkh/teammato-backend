@@ -96,7 +96,7 @@ namespace TeammatoBackend.WebSockets
             DateTime lastMessageTime = DateTime.UtcNow;
             System.Timers.Timer timer = new System.Timers.Timer(2500);
             timer.AutoReset = true;
-            timer.Elapsed+= async delegate
+            timer.Elapsed +=  delegate
             {
                 if(ws.State != WebSocketState.Open)
                 {
