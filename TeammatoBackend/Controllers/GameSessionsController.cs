@@ -87,7 +87,25 @@ namespace TeammatoBackend.Controllers
             }
             
 
-            var notification = WebSocketNotificationFactory.CreateNotification(WebSocketNotificationType.NewPlayerJoinedNotification, user);
+            var notification = WebSocketNotificationFactory.CreateNotification(WebSocketNotificationType.NewPlayerJoined, user);
+            await WebSocketService.NotifyBySession(GameSessionsStorage.GameSessionPool[sessionId], notification);
+            return Ok();
+        }
+
+        [HttpPost("{sessionId}/leave")]
+        [Authorize(AuthenticationSchemes = "access-jwt-token")]
+        public async Task<IActionResult> LeaveGameSession(string sessionId)
+        {
+            User user = await _applicationDBContext.Users.FindAsync(HttpContext.User.FindFirst("UserId")?.Value);
+            lock(new object())
+            {
+                if(!GameSessionsStorage.GameSessionPool[sessionId].Leave(user))
+                {
+                    return NotFound(404);
+                }
+            }
+
+            var notification = WebSocketNotificationFactory.CreateNotification(WebSocketNotificationType.PlayerLeavedGameSession, user);
             await WebSocketService.NotifyBySession(GameSessionsStorage.GameSessionPool[sessionId], notification);
             return Ok();
         }

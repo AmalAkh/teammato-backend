@@ -22,9 +22,9 @@ namespace TeammatoBackend.WebSockets
         public static async Task NotifyBySession(GameSession gameSession, WebSocketNotification notification)
         {
             await webSocketHandler.SendMessageTo(gameSession.Owner.Id, notification);
-            foreach(User user in gameSession.Users)
+            foreach(string userId in gameSession.Users.Keys)
             {
-                await webSocketHandler.SendMessageTo(user.Id, notification);
+                await webSocketHandler.SendMessageTo(userId, notification);
             }
         }
         

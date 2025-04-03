@@ -73,16 +73,20 @@ namespace TeammatoBackend.WebSockets
                 return owner;
             }
         }
-        protected List<User> users;
+        protected Dictionary<string, User> users;
 
-        public List<User> Users
+        public Dictionary<string,User> Users
         {
             get{return users;}
         }
 
         public void Join(User user)
         {
-            users.Add(user);
+            users.Add(user.Id, user);
+        }
+        public bool Leave(User user)
+        {
+            return users.Remove(user.Id);
         }
 
         public GameSession(string gameId,User owner,string gameName,string imageId, uint requiredPlayersCount = 1)
@@ -91,7 +95,7 @@ namespace TeammatoBackend.WebSockets
             this.gameName = gameName;
             this.imageId = imageId;
             this.owner = owner;
-            this.users = new List<User>();
+            this.users = new Dictionary<string, User>();
             this.requiredPlayersCount = requiredPlayersCount;
             this.id = Guid.NewGuid().ToString();
         }

@@ -33,8 +33,8 @@ namespace TeammatoBackend.WebSockets
         public void Join(string sessionId, User user)
         {
             gameSessions[sessionId].Join(user);
-        }   
-
+        } 
+       
         public GameSession Get(string sessionId)
         {
             return gameSessions[sessionId];
