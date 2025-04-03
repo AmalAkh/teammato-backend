@@ -110,6 +110,21 @@ namespace TeammatoBackend.Controllers
             return Ok();
         }
 
+        [HttpGet("{sessionId}/users")]
+        [Authorize(AuthenticationSchemes = "access-jwt-token")]
+        public async Task<IActionResult> GameSessionUsers(string sessionId)
+        {
+            List<User> users;
+            try
+            {
+                users = GameSessionsStorage.GameSessionPool[sessionId].Users.Values.Where((usr=>usr.Id != HttpContext.User.FindFirst("UserId").Value)).ToList();
+            }catch(KeyNotFoundException)
+            {
+                return NotFound();
+            }
+            return Ok(users);
+        }
+
 
         
         
