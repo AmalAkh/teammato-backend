@@ -103,7 +103,7 @@ app.MapControllers();
 var websocketHandler = new WebSocketHandler();
 app.Map("/ws", async (context)=>
 {
-    await websocketHandler.HandleConnection(context);
+    await WebSocketService.HandleConnection(context);
 });
 
 // Launching the application

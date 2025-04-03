@@ -5,7 +5,7 @@
 namespace TeammatoBackend.Migrations
 {
     /// <inheritdoc />
-    public partial class Chats : Migration
+    public partial class Init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -20,6 +20,21 @@ namespace TeammatoBackend.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Chat", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Users",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "text", nullable: false),
+                    NickName = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
+                    Email = table.Column<string>(type: "text", nullable: false),
+                    Password = table.Column<string>(type: "text", nullable: false),
+                    Image = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Users", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -46,10 +61,45 @@ namespace TeammatoBackend.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Languages",
+                columns: table => new
+                {
+                    ISOName = table.Column<string>(type: "text", nullable: false),
+                    UserId = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Languages", x => new { x.ISOName, x.UserId });
+                    table.ForeignKey(
+                        name: "FK_Languages_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_ChatUser_ParticipantsId",
                 table: "ChatUser",
                 column: "ParticipantsId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Languages_UserId",
+                table: "Languages",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_Email",
+                table: "Users",
+                column: "Email",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_NickName",
+                table: "Users",
+                column: "NickName",
+                unique: true);
         }
 
         /// <inheritdoc />
@@ -59,7 +109,13 @@ namespace TeammatoBackend.Migrations
                 name: "ChatUser");
 
             migrationBuilder.DropTable(
+                name: "Languages");
+
+            migrationBuilder.DropTable(
                 name: "Chat");
+
+            migrationBuilder.DropTable(
+                name: "Users");
         }
     }
 }

@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using TeammatoBackend.Abstractions;
-using TeammatoBackend.Migrations;
+
 namespace TeammatoBackend.Database 
 {
     public class ApplicationDBContext: DbContext

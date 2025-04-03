@@ -66,8 +66,24 @@ namespace TeammatoBackend.WebSockets
         protected uint requiredPlayersCount;
 
         protected User owner;
+        public User Owner
+        {
+            get
+            {
+                return owner;
+            }
+        }
         protected List<User> users;
 
+        public List<User> Users
+        {
+            get{return users;}
+        }
+
+        public void Join(User user)
+        {
+            users.Add(user);
+        }
 
         public GameSession(string gameId,User owner,string gameName,string imageId, uint requiredPlayersCount = 1)
         {
@@ -75,11 +91,10 @@ namespace TeammatoBackend.WebSockets
             this.gameName = gameName;
             this.imageId = imageId;
             this.owner = owner;
+            this.users = new List<User>();
             this.requiredPlayersCount = requiredPlayersCount;
             this.id = Guid.NewGuid().ToString();
         }
-
-
 
     }
      

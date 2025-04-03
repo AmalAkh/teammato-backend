@@ -21,6 +21,7 @@ using dotenv.net;
 using dotenv.net.Utilities;
 
 
+
 namespace TeammatoBackend.Controllers
 {
     public class GameSessionInitConfig
@@ -66,13 +67,27 @@ namespace TeammatoBackend.Controllers
             
             Cover cover = (await this._iGDBClient.QueryAsync<Cover>(IGDBClient.Endpoints.Covers, $"fields image_id; limit 1; where game={config.GameId};")).First();
             Game game = (await this._iGDBClient.QueryAsync<Game>(IGDBClient.Endpoints.Games, $"fields name; limit 1; where id={config.GameId};")).First();
-
+            
             var newGameSession = new GameSession(config.GameId, owner, game.Name, cover.ImageId, config.PlayersCount);
 
             GameSessionsStorage.GameSessionPool.Add(newGameSession);
 
             return Ok(newGameSession);
         }
+
+        [HttpPost("{sessionId}/join")]
+        [Authorize(AuthenticationSchemes = "access-jwt-token")]
+        public async Task<IActionResult> JoinGameSession(string sessionId)
+        {
+            User user = await _applicationDBContext.Users.FindAsync(HttpContext.User.FindFirst("UserId")?.Value);
+            GameSessionsStorage.GameSessionPool[sessionId].Join(user);
+
+            var notification = WebSocketNotificationFactory.CreateNotification(WebSocketNotificationType.NewPlayerJoinedNotification, user);
+            await WebSocketService.NotifyBySession(GameSessionsStorage.GameSessionPool[sessionId], notification);
+            return Ok();
+        }
+
+
         
         
         

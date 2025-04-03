@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Net.WebSockets;
 using System.Text;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,13 +15,31 @@ using TeammatoBackend.Utils;
 
 namespace TeammatoBackend.WebSockets
 {
-   
+    public class WebSocketNotification
+    {
+        public WebSocketNotificationType Type {get;set;}
+        public string Content {get;set;}
+
+        
+    }
     public class WebSocketHandler
     {
         
         Dictionary<string, List<WebSocket>> connectedUsers = new Dictionary<string, List<WebSocket>>();
 
-
+        public async Task SendMessageTo(string targetUserId,WebSocketNotification message)
+        {
+            if(!connectedUsers.ContainsKey(targetUserId))
+            {
+                return;
+            }
+            foreach(WebSocket ws in  connectedUsers[targetUserId])
+            {
+                string jsonString = JsonSerializer.Serialize(message);
+                await ws.SendAsync(Encoding.UTF8.GetBytes(jsonString), WebSocketMessageType.Text, true, CancellationToken.None);
+           
+            }       
+        }
         public async Task HandleConnection(HttpContext httpContext)
         {
             if(httpContext.WebSockets.IsWebSocketRequest)

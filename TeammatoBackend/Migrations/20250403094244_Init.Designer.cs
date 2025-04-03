@@ -11,8 +11,8 @@ using TeammatoBackend.Database;
 namespace TeammatoBackend.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20250401123846_Chats")]
-    partial class Chats
+    [Migration("20250403094244_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

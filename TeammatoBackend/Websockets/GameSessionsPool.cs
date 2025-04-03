@@ -6,6 +6,7 @@ using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using TeammatoBackend.Abstractions;
 
 namespace TeammatoBackend.WebSockets
 {
@@ -20,11 +21,19 @@ namespace TeammatoBackend.WebSockets
         {
             gameSessions = new Dictionary<string, GameSession>();
         }
-
+        public GameSession this[string sessionId]
+        {
+            get{return gameSessions[sessionId];}
+        
+        }
         public void Add(GameSession gameSession)
         {
             gameSessions.Add(gameSession.Id, gameSession);
         }
+        public void Join(string sessionId, User user)
+        {
+            gameSessions[sessionId].Join(user);
+        }   
 
         public GameSession Get(string sessionId)
         {
