@@ -69,9 +69,10 @@ namespace TeammatoBackend.Controllers
             Game game = (await this._iGDBClient.QueryAsync<Game>(IGDBClient.Endpoints.Games, $"fields name; limit 1; where id={config.GameId};")).First();
             
             var newGameSession = new GameSession(config.GameId, owner, game.Name, cover.ImageId, config.PlayersCount);
-
-            GameSessionsStorage.GameSessionPool.Add(newGameSession);
-
+            lock(new object())
+            {
+                GameSessionsStorage.GameSessionPool.Add(newGameSession);
+            }
             return Ok(newGameSession);
         }
 
@@ -80,7 +81,11 @@ namespace TeammatoBackend.Controllers
         public async Task<IActionResult> JoinGameSession(string sessionId)
         {
             User user = await _applicationDBContext.Users.FindAsync(HttpContext.User.FindFirst("UserId")?.Value);
-            GameSessionsStorage.GameSessionPool[sessionId].Join(user);
+            lock(new object())
+            {
+                GameSessionsStorage.GameSessionPool[sessionId].Join(user);
+            }
+            
 
             var notification = WebSocketNotificationFactory.CreateNotification(WebSocketNotificationType.NewPlayerJoinedNotification, user);
             await WebSocketService.NotifyBySession(GameSessionsStorage.GameSessionPool[sessionId], notification);
