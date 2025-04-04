@@ -83,7 +83,13 @@ namespace TeammatoBackend.Controllers
             User user = await _applicationDBContext.Users.FindAsync(HttpContext.User.FindFirst("UserId")?.Value);
             lock(new object())
             {
-                GameSessionsStorage.GameSessionPool[sessionId].Join(user);
+                try
+                {
+                    GameSessionsStorage.GameSessionPool[sessionId].Join(user);
+                }catch(KeyNotFoundException)
+                {
+                    return NotFound();
+                }
             }
             
 
@@ -99,7 +105,13 @@ namespace TeammatoBackend.Controllers
             User user = await _applicationDBContext.Users.FindAsync(HttpContext.User.FindFirst("UserId")?.Value);
             lock(new object())
             {
-                if(!GameSessionsStorage.GameSessionPool[sessionId].Leave(user))
+                try
+                {
+                    if(!GameSessionsStorage.GameSessionPool[sessionId].Leave(user))
+                    {
+                        return NotFound(404);
+                    }
+                }catch(KeyNotFoundException)
                 {
                     return NotFound(404);
                 }
