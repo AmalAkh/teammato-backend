@@ -17,10 +17,12 @@ namespace TeammatoBackend.Abstractions
         public string ?Id{get;set;}
         
         public List<User> Participants{get;set;}
+        public List<Message> Messages{get;set;}
         
         public Chat()
         {
             Participants = new List<User>();
+            Messages = new List<Message>();
         }
     }
         

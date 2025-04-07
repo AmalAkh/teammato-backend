@@ -1,17 +1,18 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace TeammatoBackend.Migrations
 {
     /// <inheritdoc />
-    public partial class Init : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Chat",
+                name: "Chats",
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "text", nullable: false),
@@ -19,7 +20,7 @@ namespace TeammatoBackend.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Chat", x => x.Id);
+                    table.PrimaryKey("PK_Chats", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -48,9 +49,9 @@ namespace TeammatoBackend.Migrations
                 {
                     table.PrimaryKey("PK_ChatUser", x => new { x.ChatsId, x.ParticipantsId });
                     table.ForeignKey(
-                        name: "FK_ChatUser_Chat_ChatsId",
+                        name: "FK_ChatUser_Chats_ChatsId",
                         column: x => x.ChatsId,
-                        principalTable: "Chat",
+                        principalTable: "Chats",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
@@ -79,6 +80,33 @@ namespace TeammatoBackend.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Messages",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "text", nullable: false),
+                    ChatId = table.Column<string>(type: "text", nullable: false),
+                    UserId = table.Column<string>(type: "text", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Content = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Messages", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Messages_Chats_ChatId",
+                        column: x => x.ChatId,
+                        principalTable: "Chats",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Messages_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_ChatUser_ParticipantsId",
                 table: "ChatUser",
@@ -87,6 +115,16 @@ namespace TeammatoBackend.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Languages_UserId",
                 table: "Languages",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Messages_ChatId",
+                table: "Messages",
+                column: "ChatId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Messages_UserId",
+                table: "Messages",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
@@ -112,7 +150,10 @@ namespace TeammatoBackend.Migrations
                 name: "Languages");
 
             migrationBuilder.DropTable(
-                name: "Chat");
+                name: "Messages");
+
+            migrationBuilder.DropTable(
+                name: "Chats");
 
             migrationBuilder.DropTable(
                 name: "Users");
