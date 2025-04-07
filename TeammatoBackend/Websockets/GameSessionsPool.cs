@@ -30,6 +30,10 @@ namespace TeammatoBackend.WebSockets
         {
             gameSessions.Add(gameSession.Id, gameSession);
         }
+        public bool Remove(string gameSessionId)
+        {
+            return gameSessions.Remove(gameSessionId);
+        }
         public void Join(string sessionId, User user)
         {
             gameSessions[sessionId].Join(user);

@@ -88,6 +88,7 @@ namespace TeammatoBackend.WebSockets
         {
             return users.Remove(user.Id);
         }
+        
 
         public GameSession(string gameId,User owner,string gameName,string imageId, uint requiredPlayersCount = 1)
         {

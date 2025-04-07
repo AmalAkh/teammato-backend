@@ -18,7 +18,10 @@ namespace TeammatoBackend.Abstractions
         
         public List<User> Participants{get;set;}
         
-
+        public Chat()
+        {
+            Participants = new List<User>();
+        }
     }
         
 }

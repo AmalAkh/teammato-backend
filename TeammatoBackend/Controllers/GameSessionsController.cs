@@ -122,6 +122,51 @@ namespace TeammatoBackend.Controllers
             return Ok();
         }
 
+        [HttpPost("{sessionId}/start")]
+        [Authorize(AuthenticationSchemes = "access-jwt-token")]
+        public async Task<IActionResult> StartGameSession(string sessionId)
+        {
+            
+            GameSession targetSession;
+            lock(new object())
+            {
+                try
+                {
+                    targetSession = GameSessionsStorage.GameSessionPool[sessionId];
+                    if(!GameSessionsStorage.GameSessionPool.Remove(sessionId))
+                    {
+                        return NotFound();
+                    }
+                    
+                }catch(KeyNotFoundException)
+                {
+                    return NotFound();
+                }
+                
+                
+            }
+
+            Chat gameChat = new Chat();
+            _applicationDBContext.Users.Attach(targetSession.Owner);
+            gameChat.Participants.Add(targetSession.Owner);
+            string chatName = "";
+            foreach(var participant in targetSession.Users.Values)
+            {
+                _applicationDBContext.Users.Attach(participant);
+                gameChat.Participants.Add(participant);
+                chatName+= participant.NickName;
+            }
+            gameChat.Id = Guid.NewGuid().ToString();
+            gameChat.Name = "Test chat";
+            _applicationDBContext.Chats.Add(gameChat);
+            await _applicationDBContext.SaveChangesAsync();
+
+            var notification = WebSocketNotificationFactory.CreateNotification(WebSocketNotificationType.GameSessionStarted, new {ChatId = gameChat.Id});
+            await WebSocketService.NotifyBySession(targetSession, notification);
+
+            return Ok();
+        }
+
         [HttpGet("{sessionId}/users")]
         [Authorize(AuthenticationSchemes = "access-jwt-token")]
         public async Task<IActionResult> GameSessionUsers(string sessionId)

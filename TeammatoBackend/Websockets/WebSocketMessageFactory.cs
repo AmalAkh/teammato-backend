@@ -17,7 +17,7 @@ namespace TeammatoBackend.WebSockets
 {
     public enum WebSocketNotificationType
     {
-        NewPlayerJoined, PlayerLeavedGameSession, NewChatMessage
+        NewPlayerJoined, PlayerLeavedGameSession, NewChatMessage, GameSessionStarted
     }
     public static class WebSocketNotificationFactory
     {

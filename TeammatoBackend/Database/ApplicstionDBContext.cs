@@ -9,6 +9,8 @@ namespace TeammatoBackend.Database
     {
         public DbSet<User> Users {get;set;}
         public DbSet<Language> Languages  {get;set;}
+        public DbSet<Chat> Chats  {get;set;}
+
 
         public ApplicationDBContext(DbContextOptions<ApplicationDBContext> options):base(options){}
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
