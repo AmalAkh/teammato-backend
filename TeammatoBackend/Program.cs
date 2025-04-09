@@ -7,6 +7,10 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
+using System.Net.WebSockets;
+using System.Text;
+using TeammatoBackend.Abstractions;
+using TeammatoBackend.WebSockets;
 
 // A new builder object is created and used to configure the application
 var builder = WebApplication.CreateBuilder(args);
@@ -88,10 +92,19 @@ app.UseAuthentication();
 // Enable authorization
 app.UseAuthorization();
 
+app.UseWebSockets(new WebSocketOptions(){KeepAliveTimeout=TimeSpan.FromSeconds(4)});
+
+
+
 
 // Adds endpoints for controller actions to the IEndpointRouteBuilder without specifying any routes.
 app.MapControllers();
-// Configure the HTTP request pipeline.
+
+var websocketHandler = new WebSocketHandler();
+app.Map("/ws", async (context)=>
+{
+    await WebSocketService.HandleConnection(context);
+});
 
 // Launching the application
 app.Run();

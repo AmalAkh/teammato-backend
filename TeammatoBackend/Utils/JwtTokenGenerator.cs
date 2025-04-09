@@ -15,7 +15,7 @@ public class JwtTokenGenerator
                 issuer:JwtAuthOptions.Issuer,       // Indicates the issuer of the token
                 audience:JwtAuthOptions.Audience,   // Indicates the audience of the token
                 claims:claims,                      // Statements to be attached to the token
-                expires:DateTime.UtcNow.Add(TimeSpan.FromDays(365)),        // Token expiration time (for 365 days)
+                expires:DateTime.UtcNow.Add(TimeSpan.FromHours(1)),        // Token expiration time (for 365 days)
                 signingCredentials: new SigningCredentials(
                     JwtAuthOptions.GetAccessTokenSymmetricSecurityKey(),    // Get a symmetric key to sign the token
                     SecurityAlgorithms.HmacSha256                           // Algorithm for token signature (HMAC with SHA-256)
@@ -31,7 +31,7 @@ public class JwtTokenGenerator
                 issuer:JwtAuthOptions.Issuer,       // Indicates the issuer of the token
                 audience:JwtAuthOptions.Audience,   // Indicates the audience of the token
                 claims:claims,                      // Statements to be attached to the token
-                expires:DateTime.UtcNow.Add(TimeSpan.FromMinutes(30)),      // Token expiration time (for 30 minutes)
+                expires:DateTime.UtcNow.Add(TimeSpan.FromDays(365)),      // Token expiration time (for 30 minutes)
                 signingCredentials: new SigningCredentials(
                     JwtAuthOptions.GetRefreshTokenSymmetricSecurityKey(),   // Get a symmetric key to sign the token
                     SecurityAlgorithms.HmacSha256                           // Algorithm for token signature (HMAC with SHA-256)
