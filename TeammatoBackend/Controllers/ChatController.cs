@@ -28,7 +28,7 @@ namespace TeammatoBackend.Controllers
          
         }
 
-        [HttpGet("/new")]
+        [HttpGet("new")]
         [Authorize(AuthenticationSchemes = "access-jwt-token")]
         public async Task<IActionResult> AddChat(string userId)
         {
@@ -38,6 +38,29 @@ namespace TeammatoBackend.Controllers
                 return NotFound();
             }
             return Ok(targetUsr.Languages);
+        }
+
+        [HttpGet("list")]
+        [Authorize(AuthenticationSchemes = "access-jwt-token")]
+        public async Task<IActionResult> GetChats()
+        {
+            
+            var user = await _applicationDBContext.Users.Where(usr=>usr.Id == HttpContext.User.FindFirst("UserId").Value).Include((usr)=>usr.Chats).ThenInclude(chat=>chat.Participants).FirstOrDefaultAsync();
+            if(user == null)
+            {
+                return NotFound("User not found");
+            }
+            user.Chats = user.Chats.Select((chat)=>
+            {
+                chat.Participants = chat.Participants.Select(usr=>
+                {
+                    usr.Password = "";
+                    usr.Email = "";
+                    return usr;
+                }).ToList();
+                return chat;
+            }).ToList(); 
+            return Ok(user.Chats);
         }
         
 

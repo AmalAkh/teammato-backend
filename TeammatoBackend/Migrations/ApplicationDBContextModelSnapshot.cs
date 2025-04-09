@@ -72,7 +72,6 @@ namespace TeammatoBackend.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("ChatId")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Content")
@@ -83,7 +82,6 @@ namespace TeammatoBackend.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("UserId")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
@@ -159,14 +157,12 @@ namespace TeammatoBackend.Migrations
                     b.HasOne("TeammatoBackend.Abstractions.Chat", "Chat")
                         .WithMany("Messages")
                         .HasForeignKey("ChatId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("TeammatoBackend.Abstractions.User", "Sender")
                         .WithMany("Messages")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Chat");
 
