@@ -28,6 +28,8 @@ namespace TeammatoBackend.Abstractions
         
         public ICollection<Language> ?Languages {get;set;}
         public ICollection<Message> ?Messages {get;set;}
+        public ICollection<FavoriteGame> ?FavoriteGames {get;set;}
+
         [JsonIgnore]
         public ICollection<Chat> ?Chats {get;set;}
     }

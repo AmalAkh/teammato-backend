@@ -12,6 +12,8 @@ namespace TeammatoBackend.Database
         public DbSet<Chat> Chats  {get;set;}
 
         public DbSet<Message> Messages  {get;set;}
+        public DbSet<FavoriteGame> FavoriteGames  {get;set;}
+
 
 
         public ApplicationDBContext(DbContextOptions<ApplicationDBContext> options):base(options){}
@@ -43,6 +45,13 @@ namespace TeammatoBackend.Database
 
             modelBuilder.Entity<Chat>().HasMany(chat=>chat.Participants).WithMany(usr=>usr.Chats);
             modelBuilder.Entity<Chat>().HasKey(chat=>chat.Id);
+
+
+            modelBuilder.Entity<FavoriteGame>().HasOne(game=>game.User).WithMany(usr=>usr.FavoriteGames).HasForeignKey(usr=>usr.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<FavoriteGame>().HasKey(game=>game.UserId);
+          
+
             
             modelBuilder.Entity<Message>().HasKey(msg => msg.Id);
             modelBuilder.Entity<Message>()
@@ -56,6 +65,8 @@ namespace TeammatoBackend.Database
                 .WithMany(chat => chat.Messages)
                 .HasForeignKey(msg => msg.ChatId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+
 
 
         }
