@@ -13,7 +13,13 @@ using TeammatoBackend.Utils;
 using Microsoft.IdentityModel.Tokens;
 using System.Linq;
 using System.Security.Claims;
+
 using Microsoft.AspNetCore.Identity;
+using System.Net;
+
+
+using System.Text.Json;
+using Npgsql;
 namespace TeammatoBackend.Controllers
 {
     [Route("api/languages")]
@@ -28,7 +34,8 @@ namespace TeammatoBackend.Controllers
             this._applicationDBContext = applicationDBContext;
             this._passwordHasher = new PasswordHasher<User>();
         }
-        
+    
+      
         [HttpGet("{userId}/languages")]
         [Authorize(AuthenticationSchemes = "access-jwt-token")]
         public async Task<IActionResult> GetLanguages(string userId)
@@ -36,7 +43,7 @@ namespace TeammatoBackend.Controllers
             var targetUsr = _applicationDBContext.Users.FirstOrDefault(usr=>usr.Id == userId);
             if(targetUsr == null)
             {
-                return NotFound();
+                return NotFound(new ApiSimpleResponse("user_not_found", "User was not found"));
             }
             return Ok(targetUsr.Languages);
         }
@@ -46,9 +53,15 @@ namespace TeammatoBackend.Controllers
         public async Task<IActionResult> AddLanguage([FromBody] Language language)
         {
             language.UserId = HttpContext.User.FindFirst("UserId")?.Value;
-            _applicationDBContext.Languages.Add(language);
-            _applicationDBContext.SaveChanges();
-            return Ok();
+            try
+            {
+                _applicationDBContext.Languages.Add(language);
+                _applicationDBContext.SaveChanges();
+            }catch(DbUpdateException e) when((e.InnerException as PostgresException).SqlState == "23505")
+            {
+                return Conflict(new ApiSimpleResponse("duplicate_language", "Duplicate language"));
+            }
+            return Ok(new ApiSimpleResponse("success", "Language was added", "Duplicate language"));
         }
         [HttpGet("list")]
         [Authorize(AuthenticationSchemes = "access-jwt-token")]
@@ -67,14 +80,14 @@ namespace TeammatoBackend.Controllers
 
             if (language == null)
             {
-                return NotFound();
+                return NotFound(new ApiSimpleResponse("language_not_found", "Language was not found"));
             }
             _applicationDBContext.Languages.Remove(language);
             int changes = await _applicationDBContext.SaveChangesAsync();
 
             if (changes > 0)
             {
-                return Ok(new { message = "Language deleted successfully" });
+                return Ok(new ApiSimpleResponse("success", "Language was deleted"));
             }
             return StatusCode(500);
 
