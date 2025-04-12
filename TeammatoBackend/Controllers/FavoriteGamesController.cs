@@ -51,7 +51,15 @@ namespace TeammatoBackend.Controllers
             return Ok();
         }
 
-        
+        [HttpGet("list")]
+        [Authorize(AuthenticationSchemes = "access-jwt-token")]
+        public async Task<IActionResult> ListGame()
+        {
+            var userId = HttpContext.User.FindFirst("UserId").Value;
+            var games =  _applicationDBContext.FavoriteGames.Where(game=>game.UserId == userId).ToList();
+
+            return Ok(games);
+        }
 
 
     }

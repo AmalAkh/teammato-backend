@@ -86,7 +86,7 @@ builder.Services.AddAuthentication("access-jwt-token").AddJwtBearer("refresh-jwt
 
 // Create an application instance based on the builder
 var app = builder.Build();
-
+app.UseMiddleware<CustomUnauthorizedMiddleware>();
 // Enable authentication
 app.UseAuthentication();
 // Enable authorization
