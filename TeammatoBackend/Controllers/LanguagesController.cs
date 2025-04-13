@@ -22,8 +22,8 @@ using System.Text.Json;
 using Npgsql;
 namespace TeammatoBackend.Controllers
 {
+    // Controller for managing languages
     [Route("api/languages")]
-    
     [ApiController]
     public class LanguageController : Controller
     {

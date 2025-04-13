@@ -16,8 +16,8 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
 namespace TeammatoBackend.Controllers
 {
+    // Controller for managing users
     [Route("api/users")]
-    
     [ApiController]
     public class UserController : Controller
     {
@@ -105,6 +105,33 @@ namespace TeammatoBackend.Controllers
             await _applicationDBContext.SaveChangesAsync(); // Save changes
             return Ok(newFilename); // Return the filename of the uploaded image
         }
+
+        // Define a record to transmit data about a new nickname
+        public record NickNameUpdateData(string newNickname);
+        // Update the user's nickname
+        [HttpPut("update-nickname")]
+        [Authorize(AuthenticationSchemes = "access-jwt-token")] // Requires access JWT token
+        public async Task<IActionResult> UpdateNickname([FromBody] NickNameUpdateData nickNameUpdateData)
+        {
+            // Get the current user's ID from the token
+            var userId = HttpContext.User.FindFirst("UserId")?.Value;
+            
+            // Find the user by ID
+            var user = await _applicationDBContext.Users.FirstOrDefaultAsync(usr => usr.Id == userId);
+            
+            if (user == null) // If user is not found
+            {
+                return NotFound(new ApiSimpleResponse("user_not_found", "User not found", "User not found"));
+            }
+            
+            // Update the nickname
+            user.NickName = nickNameUpdateData.newNickname;
+            // Save the changes to the database
+            await _applicationDBContext.SaveChangesAsync();
+            // Return a successful response with a message
+            return Ok(new ApiSimpleResponse("success", "Nickname updated successfully", "Nickname updated successfully"));
+        }
+
 
         // Generate a new access token based on refresh token
         [HttpGet("access-token")]
