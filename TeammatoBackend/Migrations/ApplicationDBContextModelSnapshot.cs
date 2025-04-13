@@ -51,6 +51,29 @@ namespace TeammatoBackend.Migrations
                     b.ToTable("Chats");
                 });
 
+            modelBuilder.Entity("TeammatoBackend.Abstractions.FavoriteGame", b =>
+                {
+                    b.Property<string>("GameId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Image")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("GameId", "UserId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("FavoriteGames");
+                });
+
             modelBuilder.Entity("TeammatoBackend.Abstractions.Language", b =>
                 {
                     b.Property<string>("ISOName")
@@ -103,7 +126,6 @@ namespace TeammatoBackend.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Image")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("NickName")
@@ -141,6 +163,17 @@ namespace TeammatoBackend.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("TeammatoBackend.Abstractions.FavoriteGame", b =>
+                {
+                    b.HasOne("TeammatoBackend.Abstractions.User", "User")
+                        .WithMany("FavoriteGames")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("TeammatoBackend.Abstractions.Language", b =>
                 {
                     b.HasOne("TeammatoBackend.Abstractions.User", "User")
@@ -176,6 +209,8 @@ namespace TeammatoBackend.Migrations
 
             modelBuilder.Entity("TeammatoBackend.Abstractions.User", b =>
                 {
+                    b.Navigation("FavoriteGames");
+
                     b.Navigation("Languages");
 
                     b.Navigation("Messages");

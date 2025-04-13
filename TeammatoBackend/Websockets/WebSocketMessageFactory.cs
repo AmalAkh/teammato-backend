@@ -15,18 +15,20 @@ using TeammatoBackend.Utils;
 
 namespace TeammatoBackend.WebSockets
 {
+    // Enum to define different types of WebSocket notifications
     public enum WebSocketNotificationType
     {
         NewPlayerJoined, PlayerLeavedGameSession, NewChatMessage, GameSessionStarted
     }
+    // Factory class to create WebSocket notifications
     public static class WebSocketNotificationFactory
     {
+        // Method to create a WebSocket notification with specific type and content
         public static WebSocketNotification CreateNotification<T>(WebSocketNotificationType messageType, T content)
         {
             var newMessage = new WebSocketNotification();
-            newMessage.Type = messageType;
-            
-            newMessage.Content = JsonSerializer.Serialize<T>(content);
+            newMessage.Type = messageType; // Set the notification type
+            newMessage.Content = JsonSerializer.Serialize<T>(content); // Serialize content to JSON
             return newMessage;
         }
 

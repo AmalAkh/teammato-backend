@@ -9,14 +9,10 @@ using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace TeammatoBackend.WebSockets
 {
-    
     public static class GameSessionsStorage
     {
+        // Static read-only instance of the GameSessionPool to store game sessions
         public static readonly GameSessionPool GameSessionPool = new GameSessionPool();
-
-
-
-
     }
      
 }
