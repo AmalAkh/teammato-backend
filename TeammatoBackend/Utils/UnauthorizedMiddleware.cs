@@ -15,7 +15,7 @@ namespace TeammatoBackend.Utils
         {
             await _next(context);
 
-            if (context.Response.StatusCode == StatusCodes.Status401Unauthorized)
+            if (context.Response.StatusCode == StatusCodes.Status401Unauthorized && !context.Response.HasStarted)
             {
                 context.Response.ContentType = "application/json";
               

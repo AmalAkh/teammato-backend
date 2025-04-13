@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TeammatoBackend.Database;
@@ -11,9 +12,11 @@ using TeammatoBackend.Database;
 namespace TeammatoBackend.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20250412203733_Not null image for user class")]
+    partial class Notnullimageforuserclass
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -53,10 +56,11 @@ namespace TeammatoBackend.Migrations
 
             modelBuilder.Entity("TeammatoBackend.Abstractions.FavoriteGame", b =>
                 {
-                    b.Property<string>("GameId")
+                    b.Property<string>("UserId")
                         .HasColumnType("text");
 
-                    b.Property<string>("UserId")
+                    b.Property<string>("GameId")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Image")
@@ -67,9 +71,7 @@ namespace TeammatoBackend.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.HasKey("GameId", "UserId");
-
-                    b.HasIndex("UserId");
+                    b.HasKey("UserId");
 
                     b.ToTable("FavoriteGames");
                 });

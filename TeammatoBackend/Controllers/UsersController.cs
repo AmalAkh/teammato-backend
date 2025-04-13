@@ -40,7 +40,7 @@ namespace TeammatoBackend.Controllers
                 _applicationDBContext.SaveChanges();
             }catch(DbUpdateException e)
             {
-                return BadRequest();
+                return BadRequest(new ApiSimpleResponse("duplicate_user", "Duplicate user", "Duplicate user"));
             }
            
             var jwtToken =  JwtTokenGenerator.GenerateRefreshToken(new List<Claim>(){ new Claim("UserId", user.Id) });
@@ -52,7 +52,7 @@ namespace TeammatoBackend.Controllers
             var targetUser = await _applicationDBContext.Users.FirstOrDefaultAsync<User>((usr)=>usr.Email == signInData.Login);
             if(targetUser == null)
             {
-                return NotFound();
+                return NotFound(new ApiSimpleResponse("user_not_found", "User was not found", "User was not found"));
             } 
             if(_passwordHasher.VerifyHashedPassword(targetUser,targetUser.Password, signInData.Password) == PasswordVerificationResult.Success)
             {
@@ -60,7 +60,7 @@ namespace TeammatoBackend.Controllers
                 return Ok(token);
 
             }
-            return Unauthorized();
+            return Unauthorized(new ApiSimpleResponse("auth_failed", "Authorization failed","Authorization failed"));
         }
         [HttpGet("access-token")]
         [Authorize(AuthenticationSchemes = "refresh-jwt-token")]

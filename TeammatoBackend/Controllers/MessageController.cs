@@ -28,7 +28,7 @@ namespace TeammatoBackend.Controllers
             var userId = HttpContext.User.FindFirstValue("UserId");
             if (userId == null)
             {
-                return Unauthorized("User not found.");
+                return Unauthorized(new ApiSimpleResponse("user_not_found", "User was not found", "User was not found"));
             }
 
             var messages = await _applicationDBContext.Messages
@@ -50,13 +50,13 @@ namespace TeammatoBackend.Controllers
         {
             if (string.IsNullOrWhiteSpace(message.Content))
             {
-                return BadRequest("Message content cannot be empty.");
+                return BadRequest(new ApiSimpleResponse("empty_message", "Empty message", "Empty message"));
             }
 
             var userId = HttpContext.User.FindFirstValue("UserId");
             if (userId == null)
             {
-                return Unauthorized("User not found.");
+                return Unauthorized(new ApiSimpleResponse("user_not_found", "User was not found", "User was not found"));
             }
 
             message.Id = Guid.NewGuid().ToString();
@@ -80,7 +80,7 @@ namespace TeammatoBackend.Controllers
             var userId = HttpContext.User.FindFirstValue("UserId");
             if (userId == null)
             {
-                return Unauthorized("User not found.");
+                return Unauthorized(new ApiSimpleResponse("user_not_found", "User was not found", "User was not found"));
             }
 
             var message = await _applicationDBContext.Messages
@@ -88,13 +88,13 @@ namespace TeammatoBackend.Controllers
 
             if (message == null)
             {
-                return NotFound("Message not found or you don't have permission to delete it.");
+                return NotFound(new ApiSimpleResponse("message_not_found", "Message was not found", "Message was not found"));
             }
 
             _applicationDBContext.Messages.Remove(message);
             await _applicationDBContext.SaveChangesAsync();
 
-            return Ok();
+            return Ok(new ApiSimpleResponse("success", "Message was deleted", "Message was deleted"));
         }
     }
 }

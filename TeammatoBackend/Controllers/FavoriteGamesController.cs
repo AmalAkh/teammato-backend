@@ -16,7 +16,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
 using IGDB;
 using IGDB.Models;
-
+using Npgsql;
 using dotenv.net;
 using dotenv.net.Utilities;
 namespace TeammatoBackend.Controllers
@@ -44,11 +44,33 @@ namespace TeammatoBackend.Controllers
         public async Task<IActionResult> NewFavoriteGame([FromBody]FavoriteGame game)
         {
             game.UserId = HttpContext.User.FindFirst("UserId").Value;
-
-            _applicationDBContext.FavoriteGames.Add(game);
-            await _applicationDBContext.SaveChangesAsync();
+            try
+            {
+                _applicationDBContext.FavoriteGames.Add(game);
+                await _applicationDBContext.SaveChangesAsync();
             
-            return Ok();
+            }catch(DbUpdateException e) when((e.InnerException as PostgresException).SqlState == "23505")
+            {
+                return Conflict(new ApiSimpleResponse("duplicate_game", "Duplicate game"));
+            }
+            return Ok(new ApiSimpleResponse("success", "Game added","Game added"));
+        }
+
+        [HttpDelete("{gameId}")]
+        [Authorize(AuthenticationSchemes = "access-jwt-token")]
+        public async Task<IActionResult> DeleteFavoriteGame(string gameId)
+        {
+            var userId = HttpContext.User.FindFirst("UserId").Value;
+            var targetGame = _applicationDBContext.FavoriteGames.FirstOrDefault((game)=>game.GameId == gameId && game.UserId == userId );
+            if(targetGame == null)
+            {
+                return NotFound(new ApiSimpleResponse("game_not_found", "Game was not found","Game was not found"));
+            }
+
+            _applicationDBContext.FavoriteGames.Remove(targetGame);
+            await _applicationDBContext.SaveChangesAsync();    
+            return Ok(new ApiSimpleResponse("success", "Game was deleted","Game was deleted"));
+
         }
 
         [HttpGet("list")]

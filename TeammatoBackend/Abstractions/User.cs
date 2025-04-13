@@ -19,15 +19,15 @@ namespace TeammatoBackend.Abstractions
 
         public string Password{get;set;}
        
-
-        public string Image{get;set;}
+        
+        public string ?Image{get;set;}
+        
         [Key]
-       
-
         public string ?Id{get;set;}
         
         public ICollection<Language> ?Languages {get;set;}
         public ICollection<Message> ?Messages {get;set;}
+        [JsonIgnore]
         public ICollection<FavoriteGame> ?FavoriteGames {get;set;}
 
         [JsonIgnore]

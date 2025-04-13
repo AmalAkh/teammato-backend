@@ -88,14 +88,14 @@ namespace TeammatoBackend.Controllers
                     GameSessionsStorage.GameSessionPool[sessionId].Join(user);
                 }catch(KeyNotFoundException)
                 {
-                    return NotFound();
+                    return NotFound(new ApiSimpleResponse("game_not_found", "Game was not found", "Game was not found"));
                 }
             }
             
 
             var notification = WebSocketNotificationFactory.CreateNotification(WebSocketNotificationType.NewPlayerJoined, user);
             await WebSocketService.NotifyBySession(GameSessionsStorage.GameSessionPool[sessionId], notification);
-            return Ok();
+            return Ok(new ApiSimpleResponse("success", "Your joined the game", "Your joined the game"));
         }
 
         [HttpPost("{sessionId}/leave")]
@@ -109,17 +109,17 @@ namespace TeammatoBackend.Controllers
                 {
                     if(!GameSessionsStorage.GameSessionPool[sessionId].Leave(user))
                     {
-                        return NotFound(404);
+                        return NotFound(new ApiSimpleResponse("user_not_found", "User did not participated", "User did not participated"));
                     }
                 }catch(KeyNotFoundException)
                 {
-                    return NotFound(404);
+                    return NotFound(new ApiSimpleResponse("game_session_not_found", "Game session was not found", "Game session was not found"));
                 }
             }
 
             var notification = WebSocketNotificationFactory.CreateNotification(WebSocketNotificationType.PlayerLeavedGameSession, user);
             await WebSocketService.NotifyBySession(GameSessionsStorage.GameSessionPool[sessionId], notification);
-            return Ok();
+            return Ok(new ApiSimpleResponse("success", "Your left the game", "Your left the game"));
         }
 
         [HttpPost("{sessionId}/start")]
@@ -135,12 +135,12 @@ namespace TeammatoBackend.Controllers
                     targetSession = GameSessionsStorage.GameSessionPool[sessionId];
                     if(!GameSessionsStorage.GameSessionPool.Remove(sessionId))
                     {
-                        return NotFound();
+                        return NotFound(new ApiSimpleResponse("game_session_not_found", "Game session was not found", "Game session was not found"));
                     }
                     
                 }catch(KeyNotFoundException)
                 {
-                    return NotFound();
+                    return NotFound(new ApiSimpleResponse("game_session_not_found", "Game session was not found", "Game session was not found"));
                 }
                 
                 
@@ -164,7 +164,7 @@ namespace TeammatoBackend.Controllers
             var notification = WebSocketNotificationFactory.CreateNotification(WebSocketNotificationType.GameSessionStarted, new {ChatId = gameChat.Id});
             await WebSocketService.NotifyBySession(targetSession, notification);
 
-            return Ok();
+            return Ok(new ApiSimpleResponse("success", "Game started", "Game started"));
         }
 
         [HttpGet("{sessionId}/users")]
@@ -177,7 +177,7 @@ namespace TeammatoBackend.Controllers
                 users = GameSessionsStorage.GameSessionPool[sessionId].Users.Values.Where((usr=>usr.Id != HttpContext.User.FindFirst("UserId").Value)).ToList();
             }catch(KeyNotFoundException)
             {
-                return NotFound();
+                return NotFound(new ApiSimpleResponse("game_session_not_found", "Game session was not found", "Game session was not found"));
             }
             return Ok(users);
         }

@@ -33,7 +33,7 @@ namespace TeammatoBackend.Database
             
             modelBuilder.Entity<User>().HasIndex(u=>u.Email).IsUnique();
             
-            modelBuilder.Entity<User>().Property(u=>u.Image).IsRequired();
+            
             modelBuilder.Entity<User>().Property(u=>u.Password).IsRequired();
 
         
@@ -49,7 +49,7 @@ namespace TeammatoBackend.Database
 
             modelBuilder.Entity<FavoriteGame>().HasOne(game=>game.User).WithMany(usr=>usr.FavoriteGames).HasForeignKey(usr=>usr.UserId)
             .OnDelete(DeleteBehavior.Cascade);
-            modelBuilder.Entity<FavoriteGame>().HasKey(game=>game.UserId);
+            modelBuilder.Entity<FavoriteGame>().HasKey(game=>new{ game.GameId, game.UserId});
           
 
             
