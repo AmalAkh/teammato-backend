@@ -62,6 +62,40 @@ namespace TeammatoBackend.Controllers
             }
             return Unauthorized(new ApiSimpleResponse("auth_failed", "Authorization failed","Authorization failed"));
         }
+
+        [HttpPut("upload-image")]
+        [Authorize(AuthenticationSchemes = "access-jwt-token")]
+        public async Task<IActionResult> UploadImage()
+        {
+            var allowedExtensions = new string[]{"jpeg", "jpg", "png"};
+            if(!HttpContext.Request.HasFormContentType)
+            {
+                return BadRequest();
+            }
+            var image = HttpContext.Request.Form.Files[0];
+            if(image.Length <= 0 && image.Length > 10485760)
+            {   
+                return BadRequest();
+
+            }
+            var extension = image.ContentType.Split("/")[1];
+            if(!allowedExtensions.Contains(extension))
+            {
+                return BadRequest(new ApiSimpleResponse("ext_not_allowed", "Extension is not allowed","Extension is not allowed"));
+            }
+
+            var newFilename = Guid.NewGuid().ToString() + "."+extension;
+
+            using(var stream = System.IO.File.Create(Path.Join("UserContent", newFilename)))
+            {
+                await image.CopyToAsync(stream);
+            }
+            var userId = HttpContext.User.FindFirst("UserId")?.Value;
+            var user = _applicationDBContext.Users.FirstOrDefault(usr=>usr.Id == userId);
+            user.Image = newFilename;
+            await _applicationDBContext.SaveChangesAsync();
+            return Ok(newFilename);
+        }
         [HttpGet("access-token")]
         [Authorize(AuthenticationSchemes = "refresh-jwt-token")]
 
