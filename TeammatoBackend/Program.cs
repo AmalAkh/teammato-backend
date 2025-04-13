@@ -13,7 +13,7 @@ using TeammatoBackend.Abstractions;
 using TeammatoBackend.WebSockets;
 
 // A new builder object is created and used to configure the application
-var builder = WebApplication.CreateBuilder(args);
+var builder = WebApplication.CreateBuilder(new WebApplicationOptions(){WebRootPath="UserContent"});
 
 
 // Add services to the container.
@@ -105,6 +105,6 @@ app.Map("/ws", async (context)=>
 {
     await WebSocketService.HandleConnection(context);
 });
-
+app.UseStaticFiles("/static");
 // Launching the application
 app.Run();

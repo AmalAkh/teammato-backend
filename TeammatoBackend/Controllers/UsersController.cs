@@ -96,6 +96,9 @@ namespace TeammatoBackend.Controllers
             await _applicationDBContext.SaveChangesAsync();
             return Ok(newFilename);
         }
+
+      
+
         [HttpGet("access-token")]
         [Authorize(AuthenticationSchemes = "refresh-jwt-token")]
 
