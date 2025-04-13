@@ -31,7 +31,7 @@ namespace TeammatoBackend.Migrations
                     NickName = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
                     Email = table.Column<string>(type: "text", nullable: false),
                     Password = table.Column<string>(type: "text", nullable: false),
-                    Image = table.Column<string>(type: "text", nullable: false)
+                    Image = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -57,6 +57,26 @@ namespace TeammatoBackend.Migrations
                     table.ForeignKey(
                         name: "FK_ChatUser_Users_ParticipantsId",
                         column: x => x.ParticipantsId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "FavoriteGames",
+                columns: table => new
+                {
+                    GameId = table.Column<string>(type: "text", nullable: false),
+                    UserId = table.Column<string>(type: "text", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    Image = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FavoriteGames", x => new { x.GameId, x.UserId });
+                    table.ForeignKey(
+                        name: "FK_FavoriteGames_Users_UserId",
+                        column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -113,6 +133,11 @@ namespace TeammatoBackend.Migrations
                 column: "ParticipantsId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_FavoriteGames_UserId",
+                table: "FavoriteGames",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Languages_UserId",
                 table: "Languages",
                 column: "UserId");
@@ -145,6 +170,9 @@ namespace TeammatoBackend.Migrations
         {
             migrationBuilder.DropTable(
                 name: "ChatUser");
+
+            migrationBuilder.DropTable(
+                name: "FavoriteGames");
 
             migrationBuilder.DropTable(
                 name: "Languages");
