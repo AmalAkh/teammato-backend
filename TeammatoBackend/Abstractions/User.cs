@@ -18,6 +18,8 @@ namespace TeammatoBackend.Abstractions
         
         // The user's password, stored securely and used for authentication.
         public string Password{get;set;}
+
+        public string ?Description{get;set;}
        
         // The user's profile image.
         public string ?Image{get;set;}
