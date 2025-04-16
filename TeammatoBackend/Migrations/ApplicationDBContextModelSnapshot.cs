@@ -104,6 +104,9 @@ namespace TeammatoBackend.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<bool>("IsEdited")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("UserId")
                         .HasColumnType("text");
 

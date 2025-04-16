@@ -26,6 +26,8 @@ namespace TeammatoBackend.Abstractions
         // The content of the message.
         public string Content { get; set; }
 
+        public bool IsEdited {get; set;} = false;
+
         // Navigation property for the sender (User) of the message.
         // The [JsonIgnore] attribute ensures this property is excluded from JSON serialization to avoid circular references
         // and excessive data in the API response.

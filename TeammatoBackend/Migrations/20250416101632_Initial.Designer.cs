@@ -12,7 +12,7 @@ using TeammatoBackend.Database;
 namespace TeammatoBackend.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20250413165733_Initial")]
+    [Migration("20250416101632_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -106,6 +106,9 @@ namespace TeammatoBackend.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsEdited")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("UserId")
                         .HasColumnType("text");

@@ -108,7 +108,8 @@ namespace TeammatoBackend.Migrations
                     ChatId = table.Column<string>(type: "text", nullable: true),
                     UserId = table.Column<string>(type: "text", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    Content = table.Column<string>(type: "text", nullable: false)
+                    Content = table.Column<string>(type: "text", nullable: false),
+                    IsEdited = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {

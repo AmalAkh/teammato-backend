@@ -215,6 +215,11 @@ namespace TeammatoBackend.Controllers
             message.Content = updatedMessage.Content;
             message.CreatedAt = DateTime.UtcNow; // Set the update timestamp
 
+            if (!message.IsEdited)
+            {
+                message.IsEdited = true;
+            }
+
             // Save the changes to the database
             _applicationDBContext.Messages.Update(message);
             await _applicationDBContext.SaveChangesAsync();
