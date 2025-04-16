@@ -14,6 +14,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Linq;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
+using System.Text.RegularExpressions;
 namespace TeammatoBackend.Controllers
 {
     // Controller for managing users
@@ -31,12 +32,28 @@ namespace TeammatoBackend.Controllers
             this._passwordHasher = new PasswordHasher<User>();
         }
 
+        public record ProfileUpdateInfo(string ?newNickname, string ?newDescription, 
+                                        string ?newEmail, string ?newPassword);
+
+        static bool IsValidEmail(string email)
+        {
+            string pattern = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
+            Regex regex = new Regex(pattern);
+            return regex.IsMatch(email);
+        }
+
         // Create a new user and return a JWT token
         [HttpPost("new")]
         public async Task<IActionResult> CreateNewUser([FromBody] User user)
         {
             user.Id = Guid.NewGuid().ToString(); // Generate unique user ID
             user.Password = _passwordHasher.HashPassword(user, user.Password); // Hash the user's password
+
+            if(!IsValidEmail(user.Email))
+            {
+                return BadRequest(new ApiSimpleResponse("failure", "Wrong Email format", "Wrong Email format"));
+            }
+
             _applicationDBContext.Users.Add(user); // Add user to the database
             try
             {
@@ -106,9 +123,7 @@ namespace TeammatoBackend.Controllers
             return Ok(newFilename); // Return the filename of the uploaded image
         }
 
-        // Define a record to transmit data about a new nickname
-        public record ProfileUpdateInfo(string ?newNickname, string ?newDescription);
-        // Update the user's nickname
+        // Update user's profile data
         [HttpPut("profile-update")]
         [Authorize(AuthenticationSchemes = "access-jwt-token")] // Requires access JWT token
         public async Task<IActionResult> UpdateProfile([FromBody] ProfileUpdateInfo profileUpdateInfo)
@@ -133,6 +148,20 @@ namespace TeammatoBackend.Controllers
             if (!string.IsNullOrEmpty(profileUpdateInfo.newDescription))
             {
                 user.Description = profileUpdateInfo.newDescription;
+                noUpdateData = false;
+            }
+            if (!string.IsNullOrEmpty(profileUpdateInfo.newPassword))
+            {
+                user.Password = _passwordHasher.HashPassword(user, profileUpdateInfo.newPassword);
+                noUpdateData = false;
+            }
+            if (!string.IsNullOrEmpty(profileUpdateInfo.newEmail))
+            {
+                if(!IsValidEmail(profileUpdateInfo.newEmail))
+                {
+                    return BadRequest(new ApiSimpleResponse("failure", "Wrong Email format", "Wrong Email format"));
+                }
+                user.Email = profileUpdateInfo.newEmail;
                 noUpdateData = false;
             }
             
