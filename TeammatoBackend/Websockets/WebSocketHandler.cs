@@ -15,18 +15,18 @@ using TeammatoBackend.Utils;
 
 namespace TeammatoBackend.WebSockets
 {
+    // Represents a WebSocket notification with a type and content
     public class WebSocketNotification
     {
         public WebSocketNotificationType Type {get;set;}
         public string Content {get;set;}
-
-        
     }
+    // Handles WebSocket connections and communication
     public class WebSocketHandler
     {
-        
+        // Dictionary to store connected users and their corresponding WebSocket connections
         Dictionary<string, List<WebSocket>> connectedUsers = new Dictionary<string, List<WebSocket>>();
-
+        // Sends a message to a specific user via WebSocket
         public async Task SendMessageTo(string targetUserId,WebSocketNotification message)
         {
             if(!connectedUsers.ContainsKey(targetUserId))
@@ -40,6 +40,7 @@ namespace TeammatoBackend.WebSockets
            
             }       
         }
+        // Handles incoming WebSocket connection requests
         public async Task HandleConnection(HttpContext httpContext)
         {
             if(httpContext.WebSockets.IsWebSocketRequest)
@@ -47,7 +48,7 @@ namespace TeammatoBackend.WebSockets
                 var ws = await httpContext.WebSockets.AcceptWebSocketAsync();
                 
                 CancellationTokenSource authCancellationTokenSource = new CancellationTokenSource();
-
+                // Timer to close the connection if not authenticated within 10 seconds
                 System.Timers.Timer timer = new System.Timers.Timer(10000);
                 timer.AutoReset = false;
                 timer.Elapsed+= async delegate
@@ -73,8 +74,7 @@ namespace TeammatoBackend.WebSockets
                     return;   
                 }
                 
-
-
+                // Validate the token sent by the user
                 var token = Encoding.UTF8.GetString(buffer, 0, receiveResult.Count);
                 var validator = new JsonWebTokenHandler();
                 TokenValidationResult validationResult = await validator.ValidateTokenAsync(token,  new TokenValidationParameters
@@ -87,6 +87,7 @@ namespace TeammatoBackend.WebSockets
                     IssuerSigningKey = JwtAuthOptions.GetAccessTokenSymmetricSecurityKey(),
                     ValidateIssuerSigningKey = true,
                 });
+                // Send success or failure message based on token validation result
                 if(validationResult.IsValid)
                 {
                     await ws.SendAsync(Encoding.UTF8.GetBytes("success"), WebSocketMessageType.Text,true, CancellationToken.None);
@@ -95,6 +96,7 @@ namespace TeammatoBackend.WebSockets
                     await ws.SendAsync(Encoding.UTF8.GetBytes("failed"), WebSocketMessageType.Text,true, CancellationToken.None);
                     return;
                 }
+                // Add user to connected users list
                 string userId = (string)validationResult.Claims["UserId"];
                 if (!connectedUsers.TryGetValue(userId, out var sockets))
                 {
@@ -102,17 +104,18 @@ namespace TeammatoBackend.WebSockets
                     connectedUsers[userId] = sockets;
                 }
                 sockets.Add(ws);
-                
+                // Start listening for messages from the WebSocket
                 await StartListeningWebSocketMessages(ws, userId);
        
 
             }
         }
-        
+        // Listens for incoming messages from a specific WebSocket
         public async Task StartListeningWebSocketMessages(WebSocket ws, string userId)
         {
             CancellationTokenSource  receivingCancellationTokenSource = new CancellationTokenSource();
             DateTime lastMessageTime = DateTime.UtcNow;
+            // Timer to check WebSocket status and remove it if disconnected
             System.Timers.Timer timer = new System.Timers.Timer(2500);
             timer.AutoReset = true;
             timer.Elapsed +=  delegate

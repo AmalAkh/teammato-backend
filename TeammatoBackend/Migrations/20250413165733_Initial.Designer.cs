@@ -12,8 +12,8 @@ using TeammatoBackend.Database;
 namespace TeammatoBackend.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20250410150049_FavotriteGames_mig")]
-    partial class FavotriteGames_mig
+    [Migration("20250413165733_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -56,11 +56,10 @@ namespace TeammatoBackend.Migrations
 
             modelBuilder.Entity("TeammatoBackend.Abstractions.FavoriteGame", b =>
                 {
-                    b.Property<string>("UserId")
+                    b.Property<string>("GameId")
                         .HasColumnType("text");
 
-                    b.Property<string>("GameId")
-                        .IsRequired()
+                    b.Property<string>("UserId")
                         .HasColumnType("text");
 
                     b.Property<string>("Image")
@@ -71,7 +70,9 @@ namespace TeammatoBackend.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.HasKey("UserId");
+                    b.HasKey("GameId", "UserId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("FavoriteGames");
                 });
@@ -128,7 +129,6 @@ namespace TeammatoBackend.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Image")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("NickName")
