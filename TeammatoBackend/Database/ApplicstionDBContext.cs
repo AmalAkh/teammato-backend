@@ -66,6 +66,9 @@ namespace TeammatoBackend.Database
                 .OnDelete(DeleteBehavior.Cascade);
 
 
+            //modelBuilder.Entity()
+
+
 
 
         }

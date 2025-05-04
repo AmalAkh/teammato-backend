@@ -90,7 +90,8 @@ namespace TeammatoBackend.WebSockets
                 // Send success or failure message based on token validation result
                 if(validationResult.IsValid)
                 {
-                    await ws.SendAsync(Encoding.UTF8.GetBytes("success"), WebSocketMessageType.Text,true, CancellationToken.None);
+                    var successNotification =  WebSocketNotificationFactory.CreateNotification(WebSocketNotificationType.SuccessAuth, "success");
+                    await ws.SendAsync(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(successNotification)), WebSocketMessageType.Text,true, CancellationToken.None);
                 }else
                 {
                     await ws.SendAsync(Encoding.UTF8.GetBytes("failed"), WebSocketMessageType.Text,true, CancellationToken.None);

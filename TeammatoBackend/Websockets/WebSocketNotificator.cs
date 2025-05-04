@@ -30,6 +30,13 @@ namespace TeammatoBackend.WebSockets
                 await webSocketHandler.SendMessageTo(userId, notification);
             }
         }
+        public static async Task NotifyByChat(Chat chat, WebSocketNotification notification)
+        {
+            foreach(User user in chat.Participants )
+            {
+                await webSocketHandler.SendMessageTo(user.Id, notification);
+            }
+        }
         
 
         public static async Task HandleConnection(HttpContext httpContext)

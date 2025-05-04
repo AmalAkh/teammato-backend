@@ -68,10 +68,11 @@ namespace TeammatoBackend.Controllers
             }
             
             // Get game cover and details from IGDB
-            Cover cover = (await this._iGDBClient.QueryAsync<Cover>(IGDBClient.Endpoints.Covers, $"fields image_id; limit 1; where game={config.GameId};")).First();
+            Cover cover = (await this._iGDBClient.QueryAsync<Cover>(IGDBClient.Endpoints.Covers, $"fields image_id, url; limit 1; where game={config.GameId};")).First();
             Game game = (await this._iGDBClient.QueryAsync<Game>(IGDBClient.Endpoints.Games, $"fields name; limit 1; where id={config.GameId};")).First();
             
-            var newGameSession = new GameSession(config.GameId, owner, game.Name, cover.ImageId, config.PlayersCount);
+            var cover_url = $"https:{cover.Url}".Replace("t_thumb","t_cover_big");
+            var newGameSession = new GameSession(config.GameId, owner, game.Name, cover_url, config.PlayersCount);
             // Add new game session to the session pool
             lock(new object())
             {
@@ -170,7 +171,8 @@ namespace TeammatoBackend.Controllers
                 chatName+= participant.NickName;
             }
             gameChat.Id = Guid.NewGuid().ToString();        // Generate unique chat ID
-            gameChat.Name = "Test chat";                    // Set chat name
+            gameChat.Name = targetSession.GameName;                   // Set chat name
+            gameChat.Image = targetSession.Image;
             _applicationDBContext.Chats.Add(gameChat);      // Add chat to the database
             await _applicationDBContext.SaveChangesAsync(); // Save changes to the database
 

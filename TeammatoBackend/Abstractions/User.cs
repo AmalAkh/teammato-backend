@@ -28,7 +28,7 @@ namespace TeammatoBackend.Abstractions
 
         // A collection of languages that the user is associated with.
         public ICollection<Language> ?Languages {get;set;}
-
+        [JsonIgnore]
         // A collection of messages that this user has sent.
         public ICollection<Message> ?Messages {get;set;}
 

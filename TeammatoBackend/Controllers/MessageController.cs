@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using System.Linq;
 using TeammatoBackend.Abstractions;
 using System.Security.Claims;
+using TeammatoBackend.WebSockets;
 
 namespace TeammatoBackend.Controllers
 {
@@ -36,6 +37,7 @@ namespace TeammatoBackend.Controllers
 
             // Ensure participants are loaded and query for the chat
             var chat = await _applicationDBContext.Chats
+                
                 .Where(c => c.Id == chatId)  // Filter chat by chatId
                 .Include(c => c.Participants)  // Eager load participants
                 .FirstOrDefaultAsync();
@@ -55,9 +57,13 @@ namespace TeammatoBackend.Controllers
 
             // Get messages for the chat ordered by creation date
             var messages = await _applicationDBContext.Messages
+                
                 .Where(msg => msg.ChatId == chatId)
                 .OrderBy(msg => msg.CreatedAt)
-                .ToListAsync();
+                .Select((msg)=>
+                new {
+                    msg.ChatId, msg.Content, msg.UserId, msg.CreatedAt
+                }).ToListAsync();
 
             // If no messages are found, return a NotFound response
             
@@ -108,8 +114,12 @@ namespace TeammatoBackend.Controllers
             message.Chat = null; // Prevent navigation property issues
             message.Sender = null;
 
+
             _applicationDBContext.Messages.Add(message); // Add the message to the database
             await _applicationDBContext.SaveChangesAsync(); // Save the changes to the database
+
+            var websocketMessage = WebSocketNotificationFactory.CreateNotification(WebSocketNotificationType.NewChatMessage,message);
+            await WebSocketService.NotifyByChat(chat, websocketMessage);
 
             return CreatedAtAction(nameof(GetMessages), new { chatId }, message); // Return the created message
         }

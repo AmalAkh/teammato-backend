@@ -29,12 +29,12 @@ namespace TeammatoBackend.WebSockets
                 return gameName; // Read-only property for game name
             }
         }
-        protected string imageId;
-        public string ImageId
+        protected string image;
+        public string Image
         {
             get
             {
-                return imageId; // Read-only property for image ID
+                return image; // Read-only property for image ID
             }
         }
         protected string id;
@@ -94,11 +94,11 @@ namespace TeammatoBackend.WebSockets
         }
         
         // Constructor to initialize a game session with required details
-        public GameSession(string gameId,User owner,string gameName,string imageId, uint requiredPlayersCount = 1)
+        public GameSession(string gameId,User owner,string gameName,string image, uint requiredPlayersCount = 1)
         {
             this.gameId = gameId;
             this.gameName = gameName;
-            this.imageId = imageId;
+            this.image = image;
             this.owner = owner;
             this.users = new Dictionary<string, User>();
             this.requiredPlayersCount = requiredPlayersCount;

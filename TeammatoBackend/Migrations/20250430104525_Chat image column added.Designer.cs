@@ -12,8 +12,8 @@ using TeammatoBackend.Database;
 namespace TeammatoBackend.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20250413165733_Initial")]
-    partial class Initial
+    [Migration("20250430104525_Chat image column added")]
+    partial class Chatimagecolumnadded
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -43,6 +43,9 @@ namespace TeammatoBackend.Migrations
             modelBuilder.Entity("TeammatoBackend.Abstractions.Chat", b =>
                 {
                     b.Property<string>("Id")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Image")
                         .HasColumnType("text");
 
                     b.Property<string>("Name")
