@@ -145,9 +145,16 @@ namespace TeammatoBackend.Controllers
                 user.NickName = profileUpdateInfo.newNickname;
                 noUpdateData = false;
             }
-            if (!string.IsNullOrEmpty(profileUpdateInfo.newDescription))
+            if (profileUpdateInfo.newDescription != null)
             {
-                user.Description = profileUpdateInfo.newDescription;
+                if (string.IsNullOrEmpty(profileUpdateInfo.newDescription))
+                {
+                    user.Description = null;
+                }
+                else
+                {
+                    user.Description = profileUpdateInfo.newDescription;
+                }
                 noUpdateData = false;
             }
             if (!string.IsNullOrEmpty(profileUpdateInfo.newPassword))
@@ -181,6 +188,33 @@ namespace TeammatoBackend.Controllers
             }
             // Return a successful response with a message
             return Ok(new ApiSimpleResponse("success", "Profile updated successfully", "Profile updated successfully"));
+        }
+
+        [HttpGet("profile")]
+        [Authorize(AuthenticationSchemes = "access-jwt-token")] // Requires access JWT token
+        public async Task<IActionResult> GetProfile()
+        {
+            // Get the current user's ID from the token
+            var userId = HttpContext.User.FindFirst("UserId")?.Value;
+            
+            // Find the user by ID
+            var user = await _applicationDBContext.Users.FirstOrDefaultAsync(usr => usr.Id == userId);
+            
+            if (user == null) // If user is not found
+            {
+                return NotFound(new ApiSimpleResponse("user_not_found", "User not found", "User not found"));
+            }
+
+            // Create the response object
+            var profileData = new
+            {
+                Nickname = user.NickName,
+                Description = user.Description,
+                ImageUrl = user.Image
+            };
+            
+            // If the image does not exist, return the profile data without the image
+            return Ok(profileData);
         }
 
 
