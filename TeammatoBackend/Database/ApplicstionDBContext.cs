@@ -10,11 +10,11 @@ namespace TeammatoBackend.Database
     {
         // DbSets representing the tables in the database
         public DbSet<User> Users {get;set;}
-        public DbSet<Language> Languages  {get;set;}
-        public DbSet<Chat> Chats  {get;set;}
+        public DbSet<Language> Languages {get;set;}
+        public DbSet<Chat> Chats {get;set;}
 
-        public DbSet<Message> Messages  {get;set;}
-        public DbSet<FavoriteGame> FavoriteGames  {get;set;}
+        public DbSet<Message> Messages {get;set;}
+        public DbSet<FavoriteGame> FavoriteGames {get;set;}
 
 
         // Constructor to accept DbContextOptions

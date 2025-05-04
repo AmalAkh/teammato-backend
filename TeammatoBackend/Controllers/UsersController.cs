@@ -14,6 +14,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Linq;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
+using System.Text.RegularExpressions;
 namespace TeammatoBackend.Controllers
 {
     // Controller for managing users

@@ -122,8 +122,10 @@ namespace TeammatoBackend.Controllers
             await WebSocketService.NotifyByChat(chat, websocketMessage);
 
             return CreatedAtAction(nameof(GetMessages), new { chatId }, message); // Return the created message
+            return CreatedAtAction(nameof(GetMessages), new { chatId }, message); // Return the created message
         }
 
+        // Delete a specific message from a chat
         // Delete a specific message from a chat
         [HttpDelete("{chatId}/{id}")]
         [Authorize(AuthenticationSchemes = "access-jwt-token")] // Requires access JWT token
@@ -166,7 +168,10 @@ namespace TeammatoBackend.Controllers
 
             _applicationDBContext.Messages.Remove(message); // Remove the message
             await _applicationDBContext.SaveChangesAsync(); // Save changes to the database
+            _applicationDBContext.Messages.Remove(message); // Remove the message
+            await _applicationDBContext.SaveChangesAsync(); // Save changes to the database
 
+            // Return success response
             // Return success response
             return Ok(new ApiSimpleResponse("success", "Message was deleted", "Message was deleted"));
         }
