@@ -25,6 +25,7 @@ using dotenv.net.Utilities;
 namespace TeammatoBackend.Controllers
 {
     // Configuration for initializing a new game session
+    // Configuration for initializing a new game session
     public class GameSessionInitConfig
     {
         public string GameId{get;set;}
@@ -81,8 +82,10 @@ namespace TeammatoBackend.Controllers
                 GameSessionsStorage.GameSessionPool.Add(newGameSession);
             }
             return Ok(newGameSession); // Return newly created game session
+            return Ok(newGameSession); // Return newly created game session
         }
 
+        // Endpoint for users to join an existing game session
         // Endpoint for users to join an existing game session
         [HttpPost("{sessionId}/join")]
         [Authorize(AuthenticationSchemes = "access-jwt-token")] // Requires JWT token

@@ -37,7 +37,6 @@ namespace TeammatoBackend.Database
             modelBuilder.Entity<User>().HasIndex(u=>u.NickName).IsUnique();
             modelBuilder.Entity<User>().HasIndex(u=>u.Email).IsUnique();
             modelBuilder.Entity<User>().Property(u=>u.Password).IsRequired();
-            modelBuilder.Entity<User>().Property(u=>u.Description).HasMaxLength(200);
 
             // Language entity configurations
             modelBuilder.Entity<Language>().HasOne(lang=>lang.User).WithMany(usr=>usr.Languages)

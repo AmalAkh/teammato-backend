@@ -12,7 +12,7 @@ using TeammatoBackend.Database;
 namespace TeammatoBackend.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20250504161914_Inital")]
+    [Migration("20250504163305_Inital")]
     partial class Inital
     {
         /// <inheritdoc />
@@ -136,8 +136,7 @@ namespace TeammatoBackend.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Description")
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Email")
                         .IsRequired()

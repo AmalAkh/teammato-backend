@@ -30,7 +30,7 @@ namespace TeammatoBackend.Controllers
         // Get all messages for a specific chat
         [HttpGet("{chatId}/messages")]
         [Authorize(AuthenticationSchemes = "access-jwt-token")] // Requires access JWT token
-        [Authorize(AuthenticationSchemes = "access-jwt-token")] // Requires access JWT token
+        
         public async Task<IActionResult> GetMessages(string chatId)
         {
             var userId = HttpContext.User.FindFirstValue("UserId");
@@ -77,7 +77,7 @@ namespace TeammatoBackend.Controllers
         }
 
         // Create a new message in a chat
-        // Create a new message in a chat
+      
         [HttpPost("{chatId}/new")]
         [Authorize(AuthenticationSchemes = "access-jwt-token")] // Requires access JWT token
         public async Task<IActionResult> CreateMessage(string chatId, [FromBody] Message message)
@@ -127,6 +127,9 @@ namespace TeammatoBackend.Controllers
             _applicationDBContext.Messages.Add(message); // Add the message to the database
             await _applicationDBContext.SaveChangesAsync(); // Save the changes to the database
 
+
+
+
             var websocketMessage = WebSocketNotificationFactory.CreateNotification(WebSocketNotificationType.NewChatMessage,message);
             await WebSocketService.NotifyByChat(chat, websocketMessage);
 
@@ -135,7 +138,6 @@ namespace TeammatoBackend.Controllers
         }
 
         // Delete a specific message from a chat
-   
         [HttpDelete("{chatId}/{id}")]
         [Authorize(AuthenticationSchemes = "access-jwt-token")] // Requires access JWT token
 
@@ -173,7 +175,7 @@ namespace TeammatoBackend.Controllers
                 .FirstOrDefaultAsync(msg => msg.Id == id && msg.ChatId == chatId && msg.UserId == userId);
 
             // If the message is not found, return a NotFound response
-            // If the message is not found, return a NotFound response
+
             if (message == null)
             {
                 return NotFound(new ApiSimpleResponse("message_not_found", "Message was not found", "Message was not found"));
@@ -181,11 +183,9 @@ namespace TeammatoBackend.Controllers
 
             _applicationDBContext.Messages.Remove(message); // Remove the message
             await _applicationDBContext.SaveChangesAsync(); // Save changes to the database
-            _applicationDBContext.Messages.Remove(message); // Remove the message
-            await _applicationDBContext.SaveChangesAsync(); // Save changes to the database
+       
 
             // Return success response
-         
             return Ok(new ApiSimpleResponse("success", "Message was deleted", "Message was deleted"));
         }
 

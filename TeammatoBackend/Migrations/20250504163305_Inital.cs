@@ -32,7 +32,7 @@ namespace TeammatoBackend.Migrations
                     NickName = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
                     Email = table.Column<string>(type: "text", nullable: false),
                     Password = table.Column<string>(type: "text", nullable: false),
-                    Description = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
+                    Description = table.Column<string>(type: "text", nullable: true),
                     Image = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
