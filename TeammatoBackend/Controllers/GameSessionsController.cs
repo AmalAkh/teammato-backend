@@ -65,6 +65,8 @@ namespace TeammatoBackend.Controllers
             {
                 owner.Email = ""; // Hide sensitive data
                 owner.Password = ""; // Hide sensitive data
+                owner.Email = ""; // Hide sensitive data
+                owner.Password = ""; // Hide sensitive data
             }
             
             // Get game cover and details from IGDB

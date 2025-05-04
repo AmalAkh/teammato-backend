@@ -42,5 +42,6 @@ namespace TeammatoBackend.Abstractions
         // The [JsonIgnore] attribute prevents it from being serialized, ensuring only relevant data is sent in the API response.
         [JsonIgnore]
         public Chat ?Chat { get; set; }
+         public bool IsEdited {get; set;} = false;
     }
 }

@@ -14,6 +14,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Linq;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
+using System.Text.RegularExpressions;
 namespace TeammatoBackend.Controllers
 {
     // Controller for managing users
@@ -31,12 +32,28 @@ namespace TeammatoBackend.Controllers
             this._passwordHasher = new PasswordHasher<User>();
         }
 
+        public record ProfileUpdateInfo(string ?newNickname, string ?newDescription, 
+                                        string ?newEmail, string ?newPassword);
+
+        static bool IsValidEmail(string email)
+        {
+            string pattern = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
+            Regex regex = new Regex(pattern);
+            return regex.IsMatch(email);
+        }
+
         // Create a new user and return a JWT token
         [HttpPost("new")]
         public async Task<IActionResult> CreateNewUser([FromBody] User user)
         {
             user.Id = Guid.NewGuid().ToString(); // Generate unique user ID
             user.Password = _passwordHasher.HashPassword(user, user.Password); // Hash the user's password
+
+            if(!IsValidEmail(user.Email))
+            {
+                return BadRequest(new ApiSimpleResponse("failure", "Wrong Email format", "Wrong Email format"));
+            }
+
             _applicationDBContext.Users.Add(user); // Add user to the database
             try
             {
@@ -105,28 +122,11 @@ namespace TeammatoBackend.Controllers
             await _applicationDBContext.SaveChangesAsync(); // Save changes
             return Ok(newFilename); // Return the filename of the uploaded image
         }
-        [HttpGet("info")]
-        [Authorize(AuthenticationSchemes = "access-jwt-token")]
-        public async Task<IActionResult> GetUserInfo()
-        {
-            var userId = HttpContext.User.FindFirst("UserId")?.Value;
-            var user = _applicationDBContext.Users.Where((usr)=>usr.Id == userId).Select(usr => new {
-                usr.Id,
-                usr.NickName,
-                
-                
-                usr.Image
-                // include all fields you want, EXCLUDE Email and Password
-            }).FirstOrDefault();
-            return Ok(user);
-        }
 
-        // Define a record to transmit data about a new nickname
-        public record NickNameUpdateData(string newNickname);
-        // Update the user's nickname
-        [HttpPut("update-nickname")]
+        // Update user's profile data
+        [HttpPut("profile-update")]
         [Authorize(AuthenticationSchemes = "access-jwt-token")] // Requires access JWT token
-        public async Task<IActionResult> UpdateNickname([FromBody] NickNameUpdateData nickNameUpdateData)
+        public async Task<IActionResult> UpdateProfile([FromBody] ProfileUpdateInfo profileUpdateInfo)
         {
             // Get the current user's ID from the token
             var userId = HttpContext.User.FindFirst("UserId")?.Value;
@@ -138,13 +138,83 @@ namespace TeammatoBackend.Controllers
             {
                 return NotFound(new ApiSimpleResponse("user_not_found", "User not found", "User not found"));
             }
+
+            bool noUpdateData = true;
+            if (!string.IsNullOrEmpty(profileUpdateInfo.newNickname))
+            {
+                user.NickName = profileUpdateInfo.newNickname;
+                noUpdateData = false;
+            }
+            if (profileUpdateInfo.newDescription != null)
+            {
+                if (string.IsNullOrEmpty(profileUpdateInfo.newDescription))
+                {
+                    user.Description = null;
+                }
+                else
+                {
+                    user.Description = profileUpdateInfo.newDescription;
+                }
+                noUpdateData = false;
+            }
+            if (!string.IsNullOrEmpty(profileUpdateInfo.newPassword))
+            {
+                user.Password = _passwordHasher.HashPassword(user, profileUpdateInfo.newPassword);
+                noUpdateData = false;
+            }
+            if (!string.IsNullOrEmpty(profileUpdateInfo.newEmail))
+            {
+                if(!IsValidEmail(profileUpdateInfo.newEmail))
+                {
+                    return BadRequest(new ApiSimpleResponse("failure", "Wrong Email format", "Wrong Email format"));
+                }
+                user.Email = profileUpdateInfo.newEmail;
+                noUpdateData = false;
+            }
             
-            // Update the nickname
-            user.NickName = nickNameUpdateData.newNickname;
+            if (noUpdateData)
+            {
+                return BadRequest(new ApiSimpleResponse("no_update_info", "No Update Info", "No Update Info"));
+            }
+
             // Save the changes to the database
-            await _applicationDBContext.SaveChangesAsync();
+            try
+            {
+                await _applicationDBContext.SaveChangesAsync();
+            }
+            catch (DbUpdateException e)
+            {
+                return BadRequest(new ApiSimpleResponse("not_unique_data", "Nickname or Email is not unique", "Nickname or Email is not unique"));
+            }
             // Return a successful response with a message
-            return Ok(new ApiSimpleResponse("success", "Nickname updated successfully", "Nickname updated successfully"));
+            return Ok(new ApiSimpleResponse("success", "Profile updated successfully", "Profile updated successfully"));
+        }
+
+        [HttpGet("profile")]
+        [Authorize(AuthenticationSchemes = "access-jwt-token")] // Requires access JWT token
+        public async Task<IActionResult> GetProfile()
+        {
+            // Get the current user's ID from the token
+            var userId = HttpContext.User.FindFirst("UserId")?.Value;
+            
+            // Find the user by ID
+            var user = await _applicationDBContext.Users.FirstOrDefaultAsync(usr => usr.Id == userId);
+            
+            if (user == null) // If user is not found
+            {
+                return NotFound(new ApiSimpleResponse("user_not_found", "User not found", "User not found"));
+            }
+
+            // Create the response object
+            var profileData = new
+            {
+                Nickname = user.NickName,
+                Description = user.Description,
+                ImageUrl = user.Image
+            };
+            
+            // If the image does not exist, return the profile data without the image
+            return Ok(profileData);
         }
 
 

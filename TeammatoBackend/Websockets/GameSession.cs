@@ -13,12 +13,14 @@ namespace TeammatoBackend.WebSockets
     public class GameSession
     {
         // Protected fields for game session properties
+        // Protected fields for game session properties
         protected string description;
         public string Description
         {
             get
             {
                 return description; // Read-only property for description
+             // Read-only property for description
             }
         }
         protected string gameName;
@@ -27,6 +29,7 @@ namespace TeammatoBackend.WebSockets
             get
             {
                 return gameName; // Read-only property for game name
+                 // Read-only property for game name
             }
         }
         protected string image;
@@ -43,6 +46,7 @@ namespace TeammatoBackend.WebSockets
             get
             {
                 return id; // Read-only property for session ID
+               
             }
         }
         public string GameId
@@ -50,6 +54,7 @@ namespace TeammatoBackend.WebSockets
             get
             {
                 return gameId; // Read-only property for game ID
+                
             }
         }
 
@@ -61,6 +66,7 @@ namespace TeammatoBackend.WebSockets
             get
             {
                 return requiredPlayersCount; // Read-only property for required player count
+         
             }
         }
 
@@ -72,6 +78,7 @@ namespace TeammatoBackend.WebSockets
             get
             {
                 return owner; // Read-only property for the owner
+              
             }
         }
         protected Dictionary<string, User> users;
@@ -79,13 +86,17 @@ namespace TeammatoBackend.WebSockets
         public Dictionary<string,User> Users
         {
             get{return users;} // Read-only property for list of users
+            
         }
 
         // Method to add a user to the session
+      
         public void Join(User user)
         {
             users.Add(user.Id, user);
         }
+
+        // Method to remove a user from the session
 
         // Method to remove a user from the session
         public bool Leave(User user)
@@ -102,6 +113,7 @@ namespace TeammatoBackend.WebSockets
             this.owner = owner;
             this.users = new Dictionary<string, User>();
             this.requiredPlayersCount = requiredPlayersCount;
+            this.id = Guid.NewGuid().ToString(); // Generate unique session ID
             this.id = Guid.NewGuid().ToString(); // Generate unique session ID
         }
 

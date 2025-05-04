@@ -10,11 +10,11 @@ namespace TeammatoBackend.Database
     {
         // DbSets representing the tables in the database
         public DbSet<User> Users {get;set;}
-        public DbSet<Language> Languages  {get;set;}
-        public DbSet<Chat> Chats  {get;set;}
+        public DbSet<Language> Languages {get;set;}
+        public DbSet<Chat> Chats {get;set;}
 
-        public DbSet<Message> Messages  {get;set;}
-        public DbSet<FavoriteGame> FavoriteGames  {get;set;}
+        public DbSet<Message> Messages {get;set;}
+        public DbSet<FavoriteGame> FavoriteGames {get;set;}
 
 
         // Constructor to accept DbContextOptions
@@ -37,6 +37,7 @@ namespace TeammatoBackend.Database
             modelBuilder.Entity<User>().HasIndex(u=>u.NickName).IsUnique();
             modelBuilder.Entity<User>().HasIndex(u=>u.Email).IsUnique();
             modelBuilder.Entity<User>().Property(u=>u.Password).IsRequired();
+            modelBuilder.Entity<User>().Property(u=>u.Description).HasMaxLength(200);
 
             // Language entity configurations
             modelBuilder.Entity<Language>().HasOne(lang=>lang.User).WithMany(usr=>usr.Languages)
