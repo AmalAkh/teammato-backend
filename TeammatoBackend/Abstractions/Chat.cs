@@ -23,6 +23,7 @@ namespace TeammatoBackend.Abstractions
         // A list of participants in the chat.
         public List<User> Participants{get;set;}
 
+        public User Owner{get;set;}
         // A list of messages associated with the chat.
         public List<Message> Messages{get;set;}
         

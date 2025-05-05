@@ -168,6 +168,7 @@ namespace TeammatoBackend.Controllers
             Chat gameChat = new Chat();
             _applicationDBContext.Users.Attach(targetSession.Owner); // Attach owner to the chat
             gameChat.Participants.Add(targetSession.Owner);
+            gameChat.Owner = targetSession.Owner;
             string chatName = "";
             foreach(var participant in targetSession.Users.Values)
             {

@@ -41,5 +41,8 @@ namespace TeammatoBackend.Abstractions
         // A collection of chats that this user is a participant in.
         [JsonIgnore]
         public ICollection<Chat> ?Chats {get;set;}
+
+        [JsonIgnore]
+        public ICollection<Chat> ?OwnedChats {get;set;}
     }
 }

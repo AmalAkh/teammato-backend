@@ -45,6 +45,7 @@ namespace TeammatoBackend.Database
 
             // Chat entity configurations
             modelBuilder.Entity<Chat>().HasMany(chat=>chat.Participants).WithMany(usr=>usr.Chats);
+            modelBuilder.Entity<Chat>().HasOne((chat)=>chat.Owner).WithMany((usr)=>usr.OwnedChats);
             modelBuilder.Entity<Chat>().HasKey(chat=>chat.Id);
 
             // FavoriteGame entity configurations

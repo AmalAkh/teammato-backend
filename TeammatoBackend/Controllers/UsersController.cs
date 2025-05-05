@@ -216,7 +216,21 @@ namespace TeammatoBackend.Controllers
             // If the image does not exist, return the profile data without the image
             return Ok(profileData);
         }
-
+        [HttpGet("info")]
+        [Authorize(AuthenticationSchemes = "access-jwt-token")]
+         public async Task<IActionResult> GetUserInfo()
+         {
+             var userId = HttpContext.User.FindFirst("UserId")?.Value;
+             var user = _applicationDBContext.Users.Where((usr)=>usr.Id == userId).Select(usr => new {
+                 usr.Id,
+                 usr.NickName,
+                 
+                 
+                 usr.Image
+                 // include all fields you want, EXCLUDE Email and Password
+             }).FirstOrDefault();
+             return Ok(user);
+         }
 
         // Generate a new access token based on refresh token
         [HttpGet("access-token")]
