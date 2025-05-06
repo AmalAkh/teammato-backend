@@ -25,9 +25,9 @@ namespace TeammatoBackend.WebSockets
             // Send notification to the game session owner
             await webSocketHandler.SendMessageTo(gameSession.Owner.Id, notification);
             // Send notification to all users in the game session
-            foreach(string userId in gameSession.Users.Keys)
+            foreach(var user in gameSession.Participants)
             {
-                await webSocketHandler.SendMessageTo(userId, notification);
+                await webSocketHandler.SendMessageTo(user.Id, notification);
             }
         }
         public static async Task NotifyByChat(Chat chat, WebSocketNotification notification)

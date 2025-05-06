@@ -1,7 +1,9 @@
 
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using TeammatoBackend.Abstractions;
+using TeammatoBackend.WebSockets;
 
 namespace TeammatoBackend.Database 
 {
@@ -12,6 +14,8 @@ namespace TeammatoBackend.Database
         public DbSet<User> Users {get;set;}
         public DbSet<Language> Languages {get;set;}
         public DbSet<Chat> Chats {get;set;}
+
+        public DbSet<GameSession> GameSessions {get;set;}
 
         public DbSet<Message> Messages {get;set;}
         public DbSet<FavoriteGame> FavoriteGames {get;set;}
@@ -66,7 +70,11 @@ namespace TeammatoBackend.Database
                 .HasForeignKey(msg => msg.ChatId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-
+            modelBuilder.Entity<GameSession>().HasOne((gameSession)=>gameSession.Owner).WithMany((usr)=>usr.OwnedGameSessions);
+            modelBuilder.Entity<GameSession>().HasMany((gameSession)=>gameSession.Participants).WithMany((usr)=>usr.ParticipatedGameSessions);
+            
+            modelBuilder.Entity<GameSession>().HasKey((gameSession)=>gameSession.Id);
+            //modelBuilder.Entity<GameSession>().Property((gameSession)=>gameSession.Description).
             //modelBuilder.Entity()
 
 

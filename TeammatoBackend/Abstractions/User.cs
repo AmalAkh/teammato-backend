@@ -44,5 +44,11 @@ namespace TeammatoBackend.Abstractions
 
         [JsonIgnore]
         public ICollection<Chat> ?OwnedChats {get;set;}
+        [JsonIgnore]
+        public ICollection<GameSession> ?OwnedGameSessions {get;set;}
+        [JsonIgnore]
+        public ICollection<GameSession> ?ParticipatedGameSessions {get;set;}
+
+        
     }
 }
