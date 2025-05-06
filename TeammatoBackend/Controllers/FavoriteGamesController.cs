@@ -96,7 +96,7 @@ namespace TeammatoBackend.Controllers
             
             string query = $"search \"{request.Name}\";fields name, id, cover;";
             var games = (await this._iGDBClient.QueryAsync<Game>(IGDBClient.Endpoints.Games, query )).ToList<Game>();
-            var convertedGames = games.Select((game)=>new FavoriteGame(){ Name=game.Name, GameId=game.Id.ToString(), Image=game.Cover.Id.ToString()});
+            var convertedGames = games.Select((game)=>new FavoriteGame(){ Name=game.Name, GameId=game.Id.ToString()});
             return Ok(convertedGames);
         }
 
