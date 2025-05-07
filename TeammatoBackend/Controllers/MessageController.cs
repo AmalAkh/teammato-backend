@@ -7,6 +7,7 @@ using System.Linq;
 using TeammatoBackend.Abstractions;
 using System.Security.Claims;
 using TeammatoBackend.WebSockets;
+using TeammatoBackend.PushNotifications;
 
 namespace TeammatoBackend.Controllers
 {
@@ -93,6 +94,7 @@ namespace TeammatoBackend.Controllers
             {
                 return Unauthorized(new ApiSimpleResponse("user_not_found", "User was not found", "User was not found"));
             }
+            var targetUsr = _applicationDBContext.Users.FirstOrDefault(usr=>usr.Id == userId);
 
             
             
@@ -132,7 +134,13 @@ namespace TeammatoBackend.Controllers
 
             var websocketMessage = WebSocketNotificationFactory.CreateNotification(WebSocketNotificationType.NewChatMessage,message);
             await WebSocketService.NotifyByChat(chat, websocketMessage);
-
+            foreach(var participant in chat.Participants)
+            {
+                if(participant.Id == userId)
+                {continue;}
+                await PushNotificationHandler.SendNotification($"{targetUsr.NickName} - {chat.Name}", message.Content,"UserId", participant.Id);
+            }
+            
             return CreatedAtAction(nameof(GetMessages), new { chatId }, message); // Return the created message
             
         }

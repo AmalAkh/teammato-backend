@@ -62,13 +62,7 @@ namespace TeammatoBackend.Controllers
                 return StatusCode(400); // Invalid player count
             }
             User owner = await _applicationDBContext.Users.FindAsync(HttpContext.User.FindFirst("UserId")?.Value); // Get user from JWT token
-            if(owner != null)
-            {
-                owner.Email = ""; // Hide sensitive data
-                owner.Password = ""; // Hide sensitive data
-                owner.Email = ""; // Hide sensitive data
-                owner.Password = ""; // Hide sensitive data
-            }
+            
             
             // Get game cover and details from IGDB
             Cover cover = (await this._iGDBClient.QueryAsync<Cover>(IGDBClient.Endpoints.Covers, $"fields image_id, url; limit 1; where game={config.GameId};")).First();
@@ -86,7 +80,18 @@ namespace TeammatoBackend.Controllers
             
             await _applicationDBContext.GameSessions.AddAsync(newGameSession);
             await _applicationDBContext.SaveChangesAsync();
-            return Ok(newGameSession); // Return newly created game session
+
+            var response = new GameSession()
+            {
+                GameId = config.GameId,
+                Owner = new User { Id = owner.Id, NickName = owner.NickName}, // Don't include Email or Password
+                GameName = game.Name,
+                Image = cover_url,
+                RequiredPlayersCount = config.PlayersCount,
+                Id = newGameSession.Id,
+                Participants = new List<User> { owner }
+            };
+            return Ok(response); // Return newly created game session
            
         }
 
@@ -96,7 +101,7 @@ namespace TeammatoBackend.Controllers
         [Authorize(AuthenticationSchemes = "access-jwt-token")] // Requires JWT token
         public async Task<IActionResult> JoinGameSession(string sessionId)
         {
-            /*User user = await _applicationDBContext.Users.FindAsync(HttpContext.User.FindFirst("UserId")?.Value); // Get user from JWT token
+            User user = await _applicationDBContext.Users.FindAsync(HttpContext.User.FindFirst("UserId")?.Value); // Get user from JWT token
             lock(new object())
             {
                 try
@@ -112,9 +117,16 @@ namespace TeammatoBackend.Controllers
             // Create notification for new player
             var notification = WebSocketNotificationFactory.CreateNotification(WebSocketNotificationType.NewPlayerJoined, user);
             // Notify all players in the session
-            await WebSocketService.NotifyBySession(GameSessionsStorage.GameSessionPool[sessionId], notification);
+            GameSession targetSession = await _applicationDBContext.GameSessions
+            .Where((session)=>session.Id == sessionId)
+            .Include((session)=>session.Owner)
+            .Include((session)=>session.Participants)
+            .FirstAsync();
+            targetSession.Participants.Add(user);
+            await _applicationDBContext.SaveChangesAsync();
+            await WebSocketService.NotifyBySession(targetSession, notification);
             // Return success
-            */
+            
             return Ok(new ApiSimpleResponse("success", "Your joined the game", "Your joined the game"));
         }
 
@@ -200,18 +212,23 @@ namespace TeammatoBackend.Controllers
         [Authorize(AuthenticationSchemes = "access-jwt-token")] // Requires JWT token
         public async Task<IActionResult> GameSessionUsers(string sessionId)
         {
-            /*List<User> users;
-            try
-            {
+           
                 // Get all users in session except current user
-                users = GameSessionsStorage.GameSessionPool[sessionId].Participants.Where((usr=>usr.Id != HttpContext.User.FindFirst("UserId").Value)).ToList();
-            }catch(KeyNotFoundException)
+            GameSession targetSession = await _applicationDBContext.GameSessions
+            .Where((session)=>session.Id == sessionId)
+            .Include((session)=>session.Owner)
+            .Include((session)=>session.Participants)
+            .FirstAsync();
+
+            if(targetSession == null)
             {
-                // Session not found
                 return NotFound(new ApiSimpleResponse("game_session_not_found", "Game session was not found", "Game session was not found"));
             }
-            return Ok(users); // Return list of users*/
-            return Ok();
+                // Session not found
+                
+            
+            return Ok(targetSession.Participants); // Return list of users*/
+         
         }
     }
 }
