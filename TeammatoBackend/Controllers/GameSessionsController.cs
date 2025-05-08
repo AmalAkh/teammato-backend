@@ -19,6 +19,7 @@ using IGDB;
 using IGDB.Models;
 using dotenv.net;
 using dotenv.net.Utilities;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 
 
@@ -105,17 +106,7 @@ namespace TeammatoBackend.Controllers
         public async Task<IActionResult> JoinGameSession(string sessionId)
         {
             User user = await _applicationDBContext.Users.FindAsync(HttpContext.User.FindFirst("UserId")?.Value); // Get user from JWT token
-            lock(new object())
-            {
-                try
-                {
-                  //  GameSessionsStorage.GameSessionPool[sessionId].Join(user); // Add user to the game session
-                }catch(KeyNotFoundException)
-                {
-                    // Game session not found
-                    return NotFound(new ApiSimpleResponse("game_not_found", "Game was not found", "Game was not found"));
-                }
-            }
+            
             
             // Create notification for new player
             var notification = WebSocketNotificationFactory.CreateNotification(WebSocketNotificationType.NewPlayerJoined, 
@@ -126,6 +117,11 @@ namespace TeammatoBackend.Controllers
             .Include((session)=>session.Owner)
             .Include((session)=>session.Participants)
             .FirstAsync();
+            if(targetSession == null)
+            {
+                return NotFound(new ApiSimpleResponse("game_not_found", "Game was not found", "Game was not found"));
+
+            }
             targetSession.Participants.Add(user);
             await _applicationDBContext.SaveChangesAsync();
             await WebSocketService.NotifyBySession(targetSession, notification);
@@ -139,26 +135,54 @@ namespace TeammatoBackend.Controllers
         [Authorize(AuthenticationSchemes = "access-jwt-token")] // Requires JWT token
         public async Task<IActionResult> LeaveGameSession(string sessionId)
         {
-           /* User user = await _applicationDBContext.Users.FindAsync(HttpContext.User.FindFirst("UserId")?.Value); // Get user from JWT token
-            lock(new object())
+            User user = await _applicationDBContext.Users.FindAsync(HttpContext.User.FindFirst("UserId")?.Value); // Get user from JWT token
+            GameSession targetSession = await _applicationDBContext.GameSessions
+            .Where((session)=>session.Id == sessionId)
+            .Include((session)=>session.Owner)
+            .Include((session)=>session.Participants)
+            .FirstAsync();
+             // Get target session
+            if(targetSession == null) // Remove session from pool
             {
-                try
-                {
-                    if(!GameSessionsStorage.GameSessionPool[sessionId].pa) // Try to remove user from session
-                    {
-                        // User not found in session
-                        return NotFound(new ApiSimpleResponse("user_not_found", "User did not participated", "User did not participated"));
-                    }
-                }catch(KeyNotFoundException)
-                {
-                    // Session not found
-                    return NotFound(new ApiSimpleResponse("game_session_not_found", "Game session was not found", "Game session was not found"));
-                }
+                // Session not found
+                return NotFound(new ApiSimpleResponse("game_session_not_found", "Game session was not found", "Game session was not found"));
             }
+            targetSession.Participants.Remove(user);
+            await _applicationDBContext.SaveChangesAsync();
             // Create notification for player leaving
-            var notification = WebSocketNotificationFactory.CreateNotification(WebSocketNotificationType.PlayerLeavedGameSession, user);
+            var notification = WebSocketNotificationFactory.CreateNotification(WebSocketNotificationType.PlayerLeavedGameSession, new {user.Id, user.NickName});
             // Notify all players in the session
-            await WebSocketService.NotifyBySession(GameSessionsStorage.GameSessionPool[sessionId], notification);*/
+            await WebSocketService.NotifyBySession(targetSession, notification);
+            // Return success
+            return Ok(new ApiSimpleResponse("success", "Your left the game", "Your left the game"));
+        }
+        [HttpDelete("{sessionId}")]
+        [Authorize(AuthenticationSchemes = "access-jwt-token")] // Requires JWT token
+        public async Task<IActionResult> DeleteGameSession(string sessionId)
+        {
+            User user = await _applicationDBContext.Users.FindAsync(HttpContext.User.FindFirst("UserId")?.Value);
+            GameSession targetSession = await _applicationDBContext.GameSessions
+            .Include((session)=>session.Owner)
+            .Where((session)=>session.Id == sessionId)
+            .FirstAsync();
+            if(targetSession == null) // Remove session from pool
+            {
+                // Session not found
+                return NotFound(new ApiSimpleResponse("game_session_not_found", "Game session was not found", "Game session was not found"));
+            }
+            if(targetSession.Owner.Id != user.Id)
+            {
+                return Forbid();
+            }
+            _applicationDBContext.GameSessions.Remove(targetSession);
+
+            
+            
+            await _applicationDBContext.SaveChangesAsync();
+            // Create notification for player leaving
+            var notification = WebSocketNotificationFactory.CreateNotification(WebSocketNotificationType.GameSessionCancelled, new object());
+            // Notify all players in the session
+            await WebSocketService.NotifyBySession(targetSession, notification);
             // Return success
             return Ok(new ApiSimpleResponse("success", "Your left the game", "Your left the game"));
         }
@@ -192,6 +216,10 @@ namespace TeammatoBackend.Controllers
             string chatName = "";
             foreach(var participant in targetSession.Participants)
             {
+                if(participant.Id == gameChat.Owner.Id)
+                {
+                    continue;
+                }
                 _applicationDBContext.Users.Attach(participant); // Attach each participant to the chat
                 gameChat.Participants.Add(participant);
                 chatName+= participant.NickName;
@@ -208,7 +236,7 @@ namespace TeammatoBackend.Controllers
             await WebSocketService.NotifyBySession(targetSession, notification);
             
             // Return success
-            return Ok(new ApiSimpleResponse("success", "Game started", "Game started"));
+            return Ok(gameChat.Id);
         }
 
         // Endpoint to get the list of users in a game session

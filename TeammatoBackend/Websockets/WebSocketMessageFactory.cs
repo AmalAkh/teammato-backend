@@ -18,7 +18,7 @@ namespace TeammatoBackend.WebSockets
     // Enum to define different types of WebSocket notifications
     public enum WebSocketNotificationType
     {
-        NewPlayerJoined, PlayerLeavedGameSession, NewChatMessage, GameSessionStarted, SuccessAuth
+        NewPlayerJoined, PlayerLeavedGameSession, NewChatMessage, GameSessionStarted, SuccessAuth, GameSessionCancelled
     }
     // Factory class to create WebSocket notifications
     public static class WebSocketNotificationFactory
