@@ -28,6 +28,12 @@ namespace TeammatoBackend.Abstractions
 
         public User Owner { get; set; }
 
+        public double Latitude{get;set;}
+        public double Longitude{get;set;}
+
+        public string Langs {get;set;}
+
+
         public List<User>? Participants { get; set; }
 
 

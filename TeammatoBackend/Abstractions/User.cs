@@ -10,6 +10,7 @@ namespace TeammatoBackend.Abstractions
     // This class represents a user within the application.
     public class User
     {
+        
         // The user's nickname (username).
         public string NickName{get;set;}
         

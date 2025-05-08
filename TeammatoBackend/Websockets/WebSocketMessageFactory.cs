@@ -28,7 +28,10 @@ namespace TeammatoBackend.WebSockets
         {
             var newMessage = new WebSocketNotification();
             newMessage.Type = messageType; // Set the notification type
-            newMessage.Content = JsonSerializer.Serialize<T>(content); // Serialize content to JSON
+            newMessage.Content = JsonSerializer.Serialize<T>(content, new JsonSerializerOptions()
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            }); // Serialize content to JSON
             return newMessage;
         }
 

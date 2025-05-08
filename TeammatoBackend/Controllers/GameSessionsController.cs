@@ -31,6 +31,7 @@ namespace TeammatoBackend.Controllers
         public string GameId{get;set;}
         public string ?Description {get;set;}
         public  uint PlayersCount {get;set;}
+        public List<string> Languages {get;set;}
     }
 
     // Controller for managing game sessions
@@ -73,6 +74,7 @@ namespace TeammatoBackend.Controllers
             {
                 GameId = config.GameId, Owner=owner, GameName = game.Name, Image = cover_url, RequiredPlayersCount = config.PlayersCount,
                 Id = Guid.NewGuid().ToString(),
+                Langs = string.Join(",", config.Languages)
             
             };
             newGameSession.Participants.Add(owner);
@@ -91,6 +93,7 @@ namespace TeammatoBackend.Controllers
                 Id = newGameSession.Id,
                 Participants = new List<User> { owner }
             };
+
             return Ok(response); // Return newly created game session
            
         }
@@ -115,7 +118,8 @@ namespace TeammatoBackend.Controllers
             }
             
             // Create notification for new player
-            var notification = WebSocketNotificationFactory.CreateNotification(WebSocketNotificationType.NewPlayerJoined, user);
+            var notification = WebSocketNotificationFactory.CreateNotification(WebSocketNotificationType.NewPlayerJoined, 
+            new User(){NickName = user.NickName, Id= user.Id, Image = user.Image});
             // Notify all players in the session
             GameSession targetSession = await _applicationDBContext.GameSessions
             .Where((session)=>session.Id == sessionId)

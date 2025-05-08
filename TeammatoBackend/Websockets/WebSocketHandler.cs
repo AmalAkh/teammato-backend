@@ -35,7 +35,10 @@ namespace TeammatoBackend.WebSockets
             }
             foreach(WebSocket ws in  connectedUsers[targetUserId])
             {
-                string jsonString = JsonSerializer.Serialize(message);
+                string jsonString = JsonSerializer.Serialize(message, new JsonSerializerOptions()
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                });
                 await ws.SendAsync(Encoding.UTF8.GetBytes(jsonString), WebSocketMessageType.Text, true, CancellationToken.None);
            
             }       
@@ -144,7 +147,10 @@ namespace TeammatoBackend.WebSockets
                 byte[] buffer = new byte[1024];
                 try
                 {
+                    
+                    
                     await ws.ReceiveAsync(buffer, receivingCancellationTokenSource.Token);
+                    
                 }catch(WebSocketException)
                 {
                     return;

@@ -23,7 +23,7 @@ namespace TeammatoBackend.WebSockets
         public static async Task NotifyBySession(GameSession gameSession, WebSocketNotification notification)
         {
             // Send notification to the game session owner
-            await webSocketHandler.SendMessageTo(gameSession.Owner.Id, notification);
+          
             // Send notification to all users in the game session
             foreach(var user in gameSession.Participants)
             {
