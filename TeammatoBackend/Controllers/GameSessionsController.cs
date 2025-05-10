@@ -32,7 +32,22 @@ namespace TeammatoBackend.Controllers
         public string GameId{get;set;}
         public string ?Description {get;set;}
         public  uint PlayersCount {get;set;}
+        public double Duration{get;set;}
+      
         public List<string> Languages {get;set;}
+
+    }
+    public class GameSessionSearchConfig
+    {
+        public bool Nearest { get; set; }
+        public string ?Description {get;set;}
+        public  uint PlayersCount {get;set;}
+        public List<string> Languages {get;set;}
+        public List<string> GameIds {get;set;}
+        public double DurationFrom{get;set;}
+        public double DurationTo{get;set;}
+        public double Latitude{get;set;}
+        public double Longitude{get;set;}
     }
 
     // Controller for managing game sessions
@@ -75,6 +90,7 @@ namespace TeammatoBackend.Controllers
             {
                 GameId = config.GameId, Owner=owner, GameName = game.Name, Image = cover_url, RequiredPlayersCount = config.PlayersCount,
                 Id = Guid.NewGuid().ToString(),
+                Duration = config.Duration,
                 Langs = string.Join(",", config.Languages)
             
             };
@@ -260,6 +276,70 @@ namespace TeammatoBackend.Controllers
                 
             
             return Ok(targetSession.Participants); // Return list of users*/
+         
+        }
+        [HttpPost("list")]
+        [Authorize(AuthenticationSchemes = "access-jwt-token")] // Requires JWT token
+        public async Task<IActionResult> GameSessionsList([FromBody]GameSessionSearchConfig gameSessionSearchConfig)
+        {
+           
+                // Get all users in session except current user
+            List<GameSession> targetSessions = await _applicationDBContext.GameSessions
+            .Where(
+                (session)=>session.RequiredPlayersCount == gameSessionSearchConfig.PlayersCount
+                && gameSessionSearchConfig.GameIds.Contains(session.GameId)
+                && (session.Duration >= gameSessionSearchConfig.DurationFrom)
+                && (session.Duration <= gameSessionSearchConfig.DurationTo)
+                
+            
+                ).Include((session)=>session.Participants)
+                .Include((session)=>session.Owner).ToListAsync();
+
+            var result = targetSessions.OrderBy((session)=>
+            {
+                double score = 0;
+
+                foreach(var lang in gameSessionSearchConfig.Languages)
+                {
+                    if(session.Langs.Contains(lang))
+                    {
+                        score+=1;
+                    }
+                }
+                if(gameSessionSearchConfig.Nearest)
+                {
+                    score+=Math.Abs(session.Latitude - gameSessionSearchConfig.Latitude);
+                }
+                if(gameSessionSearchConfig.Nearest)
+                {
+                    score+=Math.Abs(session.Longitude - gameSessionSearchConfig.Longitude);
+                }
+
+
+                
+
+                return score;
+            }).Select(session => 
+                new
+                {
+                    session.Description,
+                    session.GameId,
+                    session.GameName,
+                    session.Image,
+                    Duration = session.Duration,
+                    Participants = session.Participants.Select(participant => new { participant.Id }).ToList(),
+                    session.RequiredPlayersCount,
+                    Owner=new{session.Owner.NickName, session.Owner.Id}
+                    
+                }
+            ).ToList();
+            
+
+           
+                // Session not found
+                
+            
+            return Ok(result); // Return list of users*/
          
         }
     }

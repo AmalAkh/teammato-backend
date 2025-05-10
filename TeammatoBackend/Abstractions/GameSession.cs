@@ -30,6 +30,8 @@ namespace TeammatoBackend.Abstractions
 
         public double Latitude{get;set;}
         public double Longitude{get;set;}
+        public double Duration{get;set;}
+
 
         public string Langs {get;set;}
 

@@ -106,6 +106,9 @@ namespace TeammatoBackend.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("text");
 
+                    b.Property<double>("Duration")
+                        .HasColumnType("double precision");
+
                     b.Property<string>("GameId")
                         .IsRequired()
                         .HasColumnType("text");
