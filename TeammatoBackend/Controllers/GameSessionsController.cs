@@ -179,9 +179,10 @@ namespace TeammatoBackend.Controllers
             User user = await _applicationDBContext.Users.FindAsync(HttpContext.User.FindFirst("UserId")?.Value);
             GameSession targetSession = await _applicationDBContext.GameSessions
             .Include((session)=>session.Owner)
+            .Include((session)=>session.Participants)
             .Where((session)=>session.Id == sessionId)
             .FirstAsync();
-            if(targetSession == null) // Remove session from pool
+            if(targetSession == null) 
             {
                 // Session not found
                 return NotFound(new ApiSimpleResponse("game_session_not_found", "Game session was not found", "Game session was not found"));
@@ -208,13 +209,18 @@ namespace TeammatoBackend.Controllers
         [Authorize(AuthenticationSchemes = "access-jwt-token")] // Requires JWT token
         public async Task<IActionResult> StartGameSession(string sessionId)
         {
-           
-            
-            GameSession targetSession = await _applicationDBContext.GameSessions
-            .Where((session)=>session.Id == sessionId)
-            .Include((session)=>session.Owner)
-            .Include((session)=>session.Participants)
-            .FirstAsync();
+            GameSession targetSession ;
+            try
+            {
+                targetSession = await _applicationDBContext.GameSessions
+                .Where((session)=>session.Id == sessionId)
+                .Include((session)=>session.Owner)
+                .Include((session)=>session.Participants)
+                .FirstAsync();
+            }catch(InvalidOperationException e)
+            {
+                return NotFound(new ApiSimpleResponse("game_session_not_found", "Game session was not found", "Game session was not found"));
+            }
              // Get target session
             if(targetSession == null) // Remove session from pool
             {
@@ -250,7 +256,8 @@ namespace TeammatoBackend.Controllers
             var notification = WebSocketNotificationFactory.CreateNotification(WebSocketNotificationType.GameSessionStarted, new {ChatId = gameChat.Id});
             // Notify all players in the session
             await WebSocketService.NotifyBySession(targetSession, notification);
-            
+            _applicationDBContext.Remove(targetSession);
+            await _applicationDBContext.SaveChangesAsync();
             // Return success
             return Ok(gameChat.Id);
         }
@@ -275,7 +282,12 @@ namespace TeammatoBackend.Controllers
                 // Session not found
                 
             
-            return Ok(targetSession.Participants); // Return list of users*/
+            return Ok(targetSession.Participants.Select((participant)=>
+            new {
+                participant.NickName,
+                participant.Id,
+                participant.Image
+            })); // Return list of users*/
          
         }
         [HttpPost("list")]
@@ -326,6 +338,7 @@ namespace TeammatoBackend.Controllers
                     session.GameId,
                     session.GameName,
                     session.Image,
+                    session.Id,
                     Duration = session.Duration,
                     Participants = session.Participants.Select(participant => new { participant.Id }).ToList(),
                     session.RequiredPlayersCount,
