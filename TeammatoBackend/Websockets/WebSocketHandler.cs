@@ -39,6 +39,7 @@ namespace TeammatoBackend.WebSockets
                 {
                     PropertyNamingPolicy = JsonNamingPolicy.CamelCase
                 });
+                
                 await ws.SendAsync(Encoding.UTF8.GetBytes(jsonString), WebSocketMessageType.Text, true, CancellationToken.None);
            
             }       
@@ -49,7 +50,7 @@ namespace TeammatoBackend.WebSockets
             if(httpContext.WebSockets.IsWebSocketRequest)
             {
                 var ws = await httpContext.WebSockets.AcceptWebSocketAsync();
-                
+            
                 CancellationTokenSource authCancellationTokenSource = new CancellationTokenSource();
                 // Timer to close the connection if not authenticated within 10 seconds
                 System.Timers.Timer timer = new System.Timers.Timer(10000);

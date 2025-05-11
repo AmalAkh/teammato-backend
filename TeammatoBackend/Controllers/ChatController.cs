@@ -43,6 +43,20 @@ namespace TeammatoBackend.Controllers
             return Ok(targetUsr.Languages); // Return user's languages
         }
 
+        [HttpDelete("{chatId}")]
+        [Authorize(AuthenticationSchemes = "access-jwt-token")] // Requires JWT token for authentication
+        public async Task<IActionResult> RemoveChat(string chatId)
+        {
+            var targetChat = _applicationDBContext.Chats.FirstOrDefault(chat=> chat.Id == chatId); // Find target user by userId
+            if(targetChat == null)
+            {
+                return NotFound(); // Return 404 if user not found
+            }
+            _applicationDBContext.Chats.Remove(targetChat);
+            await _applicationDBContext.SaveChangesAsync();
+            return Ok(new ApiSimpleResponse("chat_removed", "Chat removed")); // Return user's languages
+        }
+
         // Endpoint to get all chats for the currently authenticated user
         [HttpGet("list")]
         [Authorize(AuthenticationSchemes = "access-jwt-token")] // Requires JWT token for authentication
