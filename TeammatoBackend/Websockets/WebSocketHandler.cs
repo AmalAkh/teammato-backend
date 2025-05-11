@@ -35,7 +35,11 @@ namespace TeammatoBackend.WebSockets
             }
             foreach(WebSocket ws in  connectedUsers[targetUserId])
             {
-                string jsonString = JsonSerializer.Serialize(message);
+                string jsonString = JsonSerializer.Serialize(message, new JsonSerializerOptions()
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                });
+                
                 await ws.SendAsync(Encoding.UTF8.GetBytes(jsonString), WebSocketMessageType.Text, true, CancellationToken.None);
            
             }       
@@ -46,7 +50,7 @@ namespace TeammatoBackend.WebSockets
             if(httpContext.WebSockets.IsWebSocketRequest)
             {
                 var ws = await httpContext.WebSockets.AcceptWebSocketAsync();
-                
+            
                 CancellationTokenSource authCancellationTokenSource = new CancellationTokenSource();
                 // Timer to close the connection if not authenticated within 10 seconds
                 System.Timers.Timer timer = new System.Timers.Timer(10000);
@@ -90,7 +94,8 @@ namespace TeammatoBackend.WebSockets
                 // Send success or failure message based on token validation result
                 if(validationResult.IsValid)
                 {
-                    await ws.SendAsync(Encoding.UTF8.GetBytes("success"), WebSocketMessageType.Text,true, CancellationToken.None);
+                    var successNotification =  WebSocketNotificationFactory.CreateNotification(WebSocketNotificationType.SuccessAuth, "success");
+                    await ws.SendAsync(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(successNotification)), WebSocketMessageType.Text,true, CancellationToken.None);
                 }else
                 {
                     await ws.SendAsync(Encoding.UTF8.GetBytes("failed"), WebSocketMessageType.Text,true, CancellationToken.None);
@@ -143,7 +148,10 @@ namespace TeammatoBackend.WebSockets
                 byte[] buffer = new byte[1024];
                 try
                 {
+                    
+                    
                     await ws.ReceiveAsync(buffer, receivingCancellationTokenSource.Token);
+                    
                 }catch(WebSocketException)
                 {
                     return;

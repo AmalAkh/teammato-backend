@@ -18,7 +18,7 @@ namespace TeammatoBackend.WebSockets
     // Enum to define different types of WebSocket notifications
     public enum WebSocketNotificationType
     {
-        NewPlayerJoined, PlayerLeavedGameSession, NewChatMessage, GameSessionStarted
+        NewPlayerJoined, PlayerLeavedGameSession, NewChatMessage, GameSessionStarted, SuccessAuth, GameSessionCancelled
     }
     // Factory class to create WebSocket notifications
     public static class WebSocketNotificationFactory
@@ -28,7 +28,10 @@ namespace TeammatoBackend.WebSockets
         {
             var newMessage = new WebSocketNotification();
             newMessage.Type = messageType; // Set the notification type
-            newMessage.Content = JsonSerializer.Serialize<T>(content); // Serialize content to JSON
+            newMessage.Content = JsonSerializer.Serialize<T>(content, new JsonSerializerOptions()
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            }); // Serialize content to JSON
             return newMessage;
         }
 

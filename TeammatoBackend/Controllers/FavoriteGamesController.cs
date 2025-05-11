@@ -88,6 +88,17 @@ namespace TeammatoBackend.Controllers
 
             return Ok(games); // Return list of favorite games
         }
+        public record GameSearchRequest(string Name);
+        [HttpPost("available-list")]
+        [Authorize(AuthenticationSchemes = "access-jwt-token")] // Requires JWT token for authentication
+        public async Task<IActionResult> ListAvailableGames([FromBody] GameSearchRequest request)
+        {
+            
+            string query = $"search \"{request.Name}\";fields name, id, cover;";
+            var games = (await this._iGDBClient.QueryAsync<Game>(IGDBClient.Endpoints.Games, query )).ToList<Game>();
+            var convertedGames = games.Select((game)=>new FavoriteGame(){ Name=game.Name, GameId=game.Id.ToString()});
+            return Ok(convertedGames);
+        }
 
 
     }

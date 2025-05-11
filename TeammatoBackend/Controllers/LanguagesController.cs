@@ -78,7 +78,9 @@ namespace TeammatoBackend.Controllers
         public async Task<IActionResult> GetLanguages()
         {
             // Return languages of the current user
-            return Ok(_applicationDBContext.Languages.Where((lang)=>lang.UserId == HttpContext.User.FindFirstValue("UserId")));
+            return Ok(_applicationDBContext.Languages.Where(
+                (lang)=>lang.UserId == HttpContext.User.FindFirstValue("UserId")
+                ).ToList());
         }
 
         // Delete a language for the current user

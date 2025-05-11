@@ -10,6 +10,7 @@ namespace TeammatoBackend.Abstractions
     // This class represents a user within the application.
     public class User
     {
+        
         // The user's nickname (username).
         public string NickName{get;set;}
         
@@ -18,6 +19,8 @@ namespace TeammatoBackend.Abstractions
         
         // The user's password, stored securely and used for authentication.
         public string Password{get;set;}
+
+        public string ?Description{get;set;}
        
         // The user's profile image.
         public string ?Image{get;set;}
@@ -28,7 +31,7 @@ namespace TeammatoBackend.Abstractions
 
         // A collection of languages that the user is associated with.
         public ICollection<Language> ?Languages {get;set;}
-
+        [JsonIgnore]
         // A collection of messages that this user has sent.
         public ICollection<Message> ?Messages {get;set;}
 
@@ -39,5 +42,14 @@ namespace TeammatoBackend.Abstractions
         // A collection of chats that this user is a participant in.
         [JsonIgnore]
         public ICollection<Chat> ?Chats {get;set;}
+
+        [JsonIgnore]
+        public ICollection<Chat> ?OwnedChats {get;set;}
+        [JsonIgnore]
+        public ICollection<GameSession> ?OwnedGameSessions {get;set;}
+        [JsonIgnore]
+        public ICollection<GameSession> ?ParticipatedGameSessions {get;set;}
+
+        
     }
 }

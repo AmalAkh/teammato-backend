@@ -43,34 +43,57 @@ namespace TeammatoBackend.Controllers
             return Ok(targetUsr.Languages); // Return user's languages
         }
 
+        [HttpDelete("{chatId}")]
+        [Authorize(AuthenticationSchemes = "access-jwt-token")] // Requires JWT token for authentication
+        public async Task<IActionResult> RemoveChat(string chatId)
+        {
+            var targetChat = _applicationDBContext.Chats.FirstOrDefault(chat=> chat.Id == chatId); // Find target user by userId
+            if(targetChat == null)
+            {
+                return NotFound(); // Return 404 if user not found
+            }
+            _applicationDBContext.Chats.Remove(targetChat);
+            await _applicationDBContext.SaveChangesAsync();
+            return Ok(new ApiSimpleResponse("chat_removed", "Chat removed")); // Return user's languages
+        }
+
         // Endpoint to get all chats for the currently authenticated user
         [HttpGet("list")]
         [Authorize(AuthenticationSchemes = "access-jwt-token")] // Requires JWT token for authentication
         public async Task<IActionResult> GetChats()
         {
             // Fetch user with chats and participants
-            var user = await _applicationDBContext.Users
-                .Where(usr=>usr.Id == HttpContext.User.FindFirst("UserId").Value) // Get user by ID from JWT
-                .Include((usr)=>usr.Chats)
-                .ThenInclude(chat=>chat.Participants)
-                .FirstOrDefaultAsync();
+            var userId = HttpContext.User.FindFirst("UserId")?.Value;
+
+            var user = await _applicationDBContext.Users.FindAsync(userId);
+
+
+            var chats = await _applicationDBContext.Chats
+            .Where(chat => chat.Participants.Any(p => p.Id == userId)).Select((chat)=>new
+            {   
+                LastMessage = chat.Messages.OrderByDescending(msg=>msg.CreatedAt).FirstOrDefault(),
+                chat.Id,
+                chat.Name,
+                chat.Image,
+                Owner = new {chat.Owner.NickName, chat.Owner.Id, chat.Owner.Image},
+                Participants = chat.Participants.Select(usr=>
+                new {
+                    usr.NickName,
+                    usr.Id,
+                    usr.Image
+                }).ToList()
+                
+                
+            }
+            ).ToListAsync();
+
             if(user == null)
             {
                 return NotFound("User not found"); // Return 404 if user not found
             }
 
-            // Remove sensitive information from participant users
-            user.Chats = user.Chats.Select((chat)=>
-            {
-                chat.Participants = chat.Participants.Select(usr=>
-                {
-                    usr.Password = "";  // Clear password
-                    usr.Email = "";     // Clear email
-                    return usr;
-                }).ToList();
-                return chat;
-            }).ToList(); 
-            return Ok(user.Chats);      // Return the user's chats with participants
+            
+            return Ok(chats);      // Return the user's chats with participants
         }
     }
 }

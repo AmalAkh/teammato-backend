@@ -11,9 +11,10 @@ using System.Net.WebSockets;
 using System.Text;
 using TeammatoBackend.Abstractions;
 using TeammatoBackend.WebSockets;
+using TeammatoBackend.PushNotifications;
 
 // A new builder object is created and used to configure the application
-var builder = WebApplication.CreateBuilder(args);
+var builder = WebApplication.CreateBuilder(new WebApplicationOptions(){WebRootPath="UserContent"});
 
 
 // Add services to the container.
@@ -94,7 +95,7 @@ app.UseAuthorization();
 
 app.UseWebSockets(new WebSocketOptions(){KeepAliveTimeout=TimeSpan.FromSeconds(4)});
 
-
+PushNotificationHandler.Init("os_v2_app_h4ihpb6ribgo5kba66ie2oiryzkzo3pqxzcue4fb7hepubbpgndknyugoamn7majrko43wqgcyahil3mqmkasvkqefgxftuptbsbdna");
 
 
 // Adds endpoints for controller actions to the IEndpointRouteBuilder without specifying any routes.
@@ -105,6 +106,6 @@ app.Map("/ws", async (context)=>
 {
     await WebSocketService.HandleConnection(context);
 });
-
+app.UseStaticFiles("/static");
 // Launching the application
 app.Run();

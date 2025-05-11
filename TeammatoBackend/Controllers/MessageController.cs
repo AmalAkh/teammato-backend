@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Identity;
 using System.Linq;
 using TeammatoBackend.Abstractions;
 using System.Security.Claims;
+using TeammatoBackend.WebSockets;
+using TeammatoBackend.PushNotifications;
 
 namespace TeammatoBackend.Controllers
 {
@@ -17,6 +19,8 @@ namespace TeammatoBackend.Controllers
         private readonly ApplicationDBContext _applicationDBContext;
 
         // Constructor initializes database context and password hasher
+
+        // Constructor initializes database context and password hasher
         public MessageController(ApplicationDBContext applicationDBContext)
         {
             this._applicationDBContext = applicationDBContext;
@@ -24,8 +28,10 @@ namespace TeammatoBackend.Controllers
         }
 
         // Get all messages for a specific chat
+        // Get all messages for a specific chat
         [HttpGet("{chatId}/messages")]
         [Authorize(AuthenticationSchemes = "access-jwt-token")] // Requires access JWT token
+        
         public async Task<IActionResult> GetMessages(string chatId)
         {
             var userId = HttpContext.User.FindFirstValue("UserId");
@@ -36,6 +42,7 @@ namespace TeammatoBackend.Controllers
 
             // Ensure participants are loaded and query for the chat
             var chat = await _applicationDBContext.Chats
+                
                 .Where(c => c.Id == chatId)  // Filter chat by chatId
                 .Include(c => c.Participants)  // Eager load participants
                 .FirstOrDefaultAsync();
@@ -55,24 +62,28 @@ namespace TeammatoBackend.Controllers
 
             // Get messages for the chat ordered by creation date
             var messages = await _applicationDBContext.Messages
+                
                 .Where(msg => msg.ChatId == chatId)
                 .OrderBy(msg => msg.CreatedAt)
-                .ToListAsync();
+                .Select((msg)=>
+                new {
+                    msg.ChatId, msg.Content, msg.UserId, msg.CreatedAt
+                }).ToListAsync();
 
             // If no messages are found, return a NotFound response
-            if (messages == null || !messages.Any())
-            {
-                return NotFound("No messages found in this chat.");
-            }
+            
 
+            return Ok(messages); // Return the list of messages
             return Ok(messages); // Return the list of messages
         }
 
         // Create a new message in a chat
+      
         [HttpPost("{chatId}/new")]
         [Authorize(AuthenticationSchemes = "access-jwt-token")] // Requires access JWT token
         public async Task<IActionResult> CreateMessage(string chatId, [FromBody] Message message)
         {
+            // Ensure the message is not empty
             if (string.IsNullOrWhiteSpace(message.Content)) // Ensure the message is not empty
             {
                 return BadRequest(new ApiSimpleResponse("empty_message", "Empty message", "Empty message"));
@@ -83,7 +94,10 @@ namespace TeammatoBackend.Controllers
             {
                 return Unauthorized(new ApiSimpleResponse("user_not_found", "User was not found", "User was not found"));
             }
+            var targetUsr = _applicationDBContext.Users.FirstOrDefault(usr=>usr.Id == userId);
 
+            
+            
             // Ensure participants are loaded and query for the chat
             var chat = await _applicationDBContext.Chats
                 .Where(c => c.Id == chatId)  // Filter chat by chatId
@@ -111,15 +125,30 @@ namespace TeammatoBackend.Controllers
             message.Chat = null; // Prevent navigation property issues
             message.Sender = null;
 
+
             _applicationDBContext.Messages.Add(message); // Add the message to the database
             await _applicationDBContext.SaveChangesAsync(); // Save the changes to the database
 
+
+
+
+            var websocketMessage = WebSocketNotificationFactory.CreateNotification(WebSocketNotificationType.NewChatMessage,message);
+            await WebSocketService.NotifyByChat(chat, websocketMessage);
+            foreach(var participant in chat.Participants)
+            {
+                if(participant.Id == userId)
+                {continue;}
+                await PushNotificationHandler.SendNotification($"{targetUsr.NickName} - {chat.Name}", message.Content,"UserId", participant.Id);
+            }
+            
             return CreatedAtAction(nameof(GetMessages), new { chatId }, message); // Return the created message
+            
         }
 
         // Delete a specific message from a chat
         [HttpDelete("{chatId}/{id}")]
         [Authorize(AuthenticationSchemes = "access-jwt-token")] // Requires access JWT token
+
         public async Task<IActionResult> DeleteMessage(string chatId, string id)
         {
             var userId = HttpContext.User.FindFirstValue("UserId");
@@ -128,6 +157,8 @@ namespace TeammatoBackend.Controllers
                 return Unauthorized(new ApiSimpleResponse("user_not_found", "User was not found", "User was not found"));
             }
 
+
+            // Find the message by ID and check if it's associated with the current user
             // Ensure participants are loaded and query for the chat
             var chat = await _applicationDBContext.Chats
                 .Where(c => c.Id == chatId)  // Filter chat by chatId
@@ -152,6 +183,7 @@ namespace TeammatoBackend.Controllers
                 .FirstOrDefaultAsync(msg => msg.Id == id && msg.ChatId == chatId && msg.UserId == userId);
 
             // If the message is not found, return a NotFound response
+
             if (message == null)
             {
                 return NotFound(new ApiSimpleResponse("message_not_found", "Message was not found", "Message was not found"));
@@ -159,6 +191,7 @@ namespace TeammatoBackend.Controllers
 
             _applicationDBContext.Messages.Remove(message); // Remove the message
             await _applicationDBContext.SaveChangesAsync(); // Save changes to the database
+       
 
             // Return success response
             return Ok(new ApiSimpleResponse("success", "Message was deleted", "Message was deleted"));
@@ -214,6 +247,11 @@ namespace TeammatoBackend.Controllers
             // Update the message content
             message.Content = updatedMessage.Content;
             message.CreatedAt = DateTime.UtcNow; // Set the update timestamp
+
+            if (!message.IsEdited)
+            {
+                message.IsEdited = true;
+            }
 
             // Save the changes to the database
             _applicationDBContext.Messages.Update(message);

@@ -37,16 +37,40 @@ namespace TeammatoBackend.Migrations
                     b.ToTable("ChatUser");
                 });
 
+            modelBuilder.Entity("GameSessionUser", b =>
+                {
+                    b.Property<string>("ParticipantsId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ParticipatedGameSessionsId")
+                        .HasColumnType("text");
+
+                    b.HasKey("ParticipantsId", "ParticipatedGameSessionsId");
+
+                    b.HasIndex("ParticipatedGameSessionsId");
+
+                    b.ToTable("GameSessionUser");
+                });
+
             modelBuilder.Entity("TeammatoBackend.Abstractions.Chat", b =>
                 {
                     b.Property<string>("Id")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Image")
                         .HasColumnType("text");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("OwnerId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("OwnerId");
 
                     b.ToTable("Chats");
                 });
@@ -74,6 +98,53 @@ namespace TeammatoBackend.Migrations
                     b.ToTable("FavoriteGames");
                 });
 
+            modelBuilder.Entity("TeammatoBackend.Abstractions.GameSession", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.Property<double>("Duration")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("GameId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("GameName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Image")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Langs")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<double>("Latitude")
+                        .HasColumnType("double precision");
+
+                    b.Property<double>("Longitude")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("OwnerId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<long>("RequiredPlayersCount")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OwnerId");
+
+                    b.ToTable("GameSessions");
+                });
+
             modelBuilder.Entity("TeammatoBackend.Abstractions.Language", b =>
                 {
                     b.Property<string>("ISOName")
@@ -92,20 +163,28 @@ namespace TeammatoBackend.Migrations
             modelBuilder.Entity("TeammatoBackend.Abstractions.Message", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasAnnotation("Relational:JsonPropertyName", "id");
 
                     b.Property<string>("ChatId")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasAnnotation("Relational:JsonPropertyName", "chatId");
 
                     b.Property<string>("Content")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasAnnotation("Relational:JsonPropertyName", "content");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasAnnotation("Relational:JsonPropertyName", "createdAt");
+
+                    b.Property<bool>("IsEdited")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("UserId")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasAnnotation("Relational:JsonPropertyName", "userId");
 
                     b.HasKey("Id");
 
@@ -119,6 +198,9 @@ namespace TeammatoBackend.Migrations
             modelBuilder.Entity("TeammatoBackend.Abstractions.User", b =>
                 {
                     b.Property<string>("Id")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Description")
                         .HasColumnType("text");
 
                     b.Property<string>("Email")
@@ -163,6 +245,32 @@ namespace TeammatoBackend.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("GameSessionUser", b =>
+                {
+                    b.HasOne("TeammatoBackend.Abstractions.User", null)
+                        .WithMany()
+                        .HasForeignKey("ParticipantsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TeammatoBackend.Abstractions.GameSession", null)
+                        .WithMany()
+                        .HasForeignKey("ParticipatedGameSessionsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("TeammatoBackend.Abstractions.Chat", b =>
+                {
+                    b.HasOne("TeammatoBackend.Abstractions.User", "Owner")
+                        .WithMany("OwnedChats")
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Owner");
+                });
+
             modelBuilder.Entity("TeammatoBackend.Abstractions.FavoriteGame", b =>
                 {
                     b.HasOne("TeammatoBackend.Abstractions.User", "User")
@@ -172,6 +280,17 @@ namespace TeammatoBackend.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("TeammatoBackend.Abstractions.GameSession", b =>
+                {
+                    b.HasOne("TeammatoBackend.Abstractions.User", "Owner")
+                        .WithMany("OwnedGameSessions")
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Owner");
                 });
 
             modelBuilder.Entity("TeammatoBackend.Abstractions.Language", b =>
@@ -214,6 +333,10 @@ namespace TeammatoBackend.Migrations
                     b.Navigation("Languages");
 
                     b.Navigation("Messages");
+
+                    b.Navigation("OwnedChats");
+
+                    b.Navigation("OwnedGameSessions");
                 });
 #pragma warning restore 612, 618
         }

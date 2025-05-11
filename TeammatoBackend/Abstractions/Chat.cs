@@ -17,10 +17,13 @@ namespace TeammatoBackend.Abstractions
         
         // The unique identifier for the chat.
         public string ?Id{get;set;}
+
+        public string ?Image{get;set;}
         
         // A list of participants in the chat.
         public List<User> Participants{get;set;}
 
+        public User Owner{get;set;}
         // A list of messages associated with the chat.
         public List<Message> Messages{get;set;}
         
